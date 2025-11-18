@@ -1,0 +1,27 @@
+{
+    "name": "expiry-cache",
+    "version": "1.0.0",
+    "author": "Darco2903",
+    "description": "",
+    "keywords": [],
+    "license": "ISC",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "type": "module",
+    "packageManager": "pnpm@10.22.0",
+    "scripts": {
+        "build": "tsc",
+        "prepack": "pnpm build",
+        "test": "vitest",
+        "test:ui": "vitest --ui",
+        "clean": "rimraf -g dist expiry-cache-*.tgz"
+    },
+    "devDependencies": {
+        "@types/node": "^24.7.2",
+        "@vitest/ui": "^3.2.4",
+        "happy-dom": "^18.0.1",
+        "rimraf": "^6.0.1",
+        "typescript": "^5.9.3",
+        "vitest": "^3.2.4"
+    }
+}
