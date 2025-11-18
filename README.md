@@ -56,7 +56,7 @@ import { ExpiryCache } from "expiry-cache";
 
 const cache = new ExpiryCache(10, (a: number, b: number) => a + b, 200);
 
-cache.refresh(5, 7);
+cache.refresh(5, 7); // typed: refresh(a: number, b: number)
 console.log(cache.getData()); // Outputs: 12
 ```
 
