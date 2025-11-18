@@ -1,6 +1,6 @@
 {
     "name": "expiry-cache",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "author": "Darco2903",
     "description": "",
     "keywords": [],
@@ -17,10 +17,10 @@
         "clean": "rimraf -g dist expiry-cache-*.tgz"
     },
     "devDependencies": {
-        "@types/node": "^24.7.2",
+        "@types/node": "^24.10.1",
         "@vitest/ui": "^3.2.4",
         "happy-dom": "^18.0.1",
-        "rimraf": "^6.0.1",
+        "rimraf": "^6.1.0",
         "typescript": "^5.9.3",
         "vitest": "^3.2.4"
     }

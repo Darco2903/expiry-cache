@@ -5,6 +5,7 @@ src/
 tests/
 tsconfig*.json
 vitest.config*.ts
+TODO.md
 
 # tarballs
 expiry-cache-*.tgz
