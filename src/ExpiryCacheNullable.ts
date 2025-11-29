@@ -1,13 +1,20 @@
 import type { RefreshFunction } from "./types.js";
 
-export class ExpiryCache<T, U extends RefreshFunction<T>> {
-    protected data: T;
+export class ExpiryCacheNullable<T, U extends RefreshFunction<T>> {
+    protected data: T | null;
     public readonly expirationTime: number;
     protected callback: U;
     protected _refreshCb: Promise<T> | null;
 
     /** The expiration timestamp in milliseconds. 0 means never expires, -1 means already expired or no data. */
     protected _expiresAt: number;
+
+    /**
+     * Checks if there is cached data.
+     */
+    public get hasData(): boolean {
+        return this.data !== null;
+    }
 
     /**
      * Gets the expiration timestamp in milliseconds.
@@ -50,9 +57,9 @@ export class ExpiryCache<T, U extends RefreshFunction<T>> {
      * @param callback The function to refresh the cached data.
      * @param expirationTime The time in milliseconds after which the cache expires. Defaults to 60_000 (1 minute). If set to 0, the cache will never expire.
      */
-    constructor(data: T, callback: U, expirationTime: number = 60_000) {
+    constructor(data: T | null, callback: U, expirationTime: number = 60_000) {
         this.data = data;
-        this._expiresAt = expirationTime === 0 ? 0 : Date.now() + expirationTime;
+        this._expiresAt = expirationTime === 0 ? 0 : data === null ? -1 : Date.now() + expirationTime;
         this.expirationTime = expirationTime;
         this.callback = callback;
         this._refreshCb = null;
@@ -63,6 +70,14 @@ export class ExpiryCache<T, U extends RefreshFunction<T>> {
      */
     public expire(): void {
         this._expiresAt = -1;
+    }
+
+    /**
+     * Invalidates the cached data and expires the cache.
+     */
+    public invalidate(): void {
+        this.data = null;
+        this.expire();
     }
 
     /**
@@ -119,7 +134,7 @@ export class ExpiryCache<T, U extends RefreshFunction<T>> {
     /**
      * Gets the raw cached data without checking expiration.
      */
-    public getRawData(): T {
+    public getRawData(): T | null {
         return this.data;
     }
 
@@ -152,7 +167,7 @@ export class ExpiryCache<T, U extends RefreshFunction<T>> {
     /**
      * Gets the cached data or refreshes it if expired.
      */
-    public async getDataOrRefresh(...args: Parameters<U>): Promise<T> {
+    public async getDataOrRefresh(...args: Parameters<U>): Promise<T | null> {
         if (this.isExpired) {
             await this.refresh(...args);
         }

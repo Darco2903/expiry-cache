@@ -1,16 +1,23 @@
 import { describe, it, expect, vi } from "vitest";
-import { ExpiryCache } from "../../src/ExpiryCache";
+import { ExpiryCacheNullable } from "../../src/ExpiryCacheNullable";
 
-describe("ExpiryCache", () => {
+describe("ExpiryCacheNullable", () => {
+    it("constructor sets expired when data is null", () => {
+        const cache = new ExpiryCacheNullable<number, () => number>(null, () => 1, 1000);
+        expect(cache.hasData).toBe(false);
+        expect(cache.isExpired).toBe(true);
+        expect(cache.getData()).toBeNull();
+    });
+
     it("constructor sets never-expire when expirationTime is 0", () => {
-        const cache = new ExpiryCache<number, () => number>(1, () => 2, 0);
+        const cache = new ExpiryCacheNullable<number, () => number>(1, () => 2, 0);
         expect(cache.doesExpire).toBe(false);
         expect(cache.timeToLive).toBeNull();
         expect(cache.getData()).toBe(1);
     });
 
     it("timeToLive clamps and reports remaining time", async () => {
-        const cache = new ExpiryCache<number, () => number>(1, () => 2, 200);
+        const cache = new ExpiryCacheNullable<number, () => number>(1, () => 2, 200);
         const ttl1 = cache.timeToLive;
         expect(typeof ttl1).toBe("number");
         expect(ttl1).toBeGreaterThanOrEqual(0);
@@ -20,8 +27,16 @@ describe("ExpiryCache", () => {
         expect(cache.timeToLive).toBe(0);
     });
 
+    it("invalidate clears data and marks expired", () => {
+        const cache = new ExpiryCacheNullable(42, () => 1, 1000);
+        expect(cache.hasData).toBe(true);
+        cache.invalidate();
+        expect(cache.hasData).toBe(false);
+        expect(cache.isExpired).toBe(true);
+    });
+
     it("neverExpire keeps data and TTL is null", () => {
-        const cache = new ExpiryCache(7, () => 1, 1000);
+        const cache = new ExpiryCacheNullable(7, () => 1, 1000);
         cache.neverExpire();
         expect(cache.doesExpire).toBe(false);
         expect(cache.timeToLive).toBeNull();
@@ -32,7 +47,7 @@ describe("ExpiryCache", () => {
         const cb = vi.fn(async () => {
             return 99;
         });
-        const cache = new ExpiryCache<number, typeof cb>(0, cb, 50);
+        const cache = new ExpiryCacheNullable<number, typeof cb>(null, cb, 50);
         await cache.refresh();
         expect(cb).toHaveBeenCalledTimes(1);
         expect(cache.getData()).toBe(99);
@@ -41,8 +56,7 @@ describe("ExpiryCache", () => {
 
     it("getDataOrRefresh triggers refresh when expired", async () => {
         const cb = vi.fn(async () => 123);
-        const cache = new ExpiryCache<number, typeof cb>(0, cb, 50);
-        cache.expire();
+        const cache = new ExpiryCacheNullable<number, typeof cb>(null, cb, 50);
         const v = await cache.getDataOrRefresh();
         expect(v).toBe(123);
         expect(cache.getData()).toBe(123);
@@ -57,8 +71,7 @@ describe("ExpiryCache", () => {
             return 555;
         });
 
-        const cache = new ExpiryCache<number, typeof cb>(0, cb, 100);
-        cache.expire();
+        const cache = new ExpiryCacheNullable<number, typeof cb>(null, cb, 100);
 
         // start multiple concurrent refreshes
         const p1 = cache.getDataOrRefresh();
@@ -84,7 +97,7 @@ describe("ExpiryCache", () => {
             throw new Error("fail");
         });
 
-        const cache = new ExpiryCache<number, typeof goodCb>(0, goodCb, 10);
+        const cache = new ExpiryCacheNullable<number, typeof goodCb>(null, goodCb, 10);
         await cache.refresh();
         expect(cache.getData()).toBe(10);
 
@@ -97,7 +110,7 @@ describe("ExpiryCache", () => {
 
     it("refreshExpiresAt and refreshExpiresIn update expiration correctly", async () => {
         const cb = vi.fn(async () => 7);
-        const cache = new ExpiryCache<number, typeof cb>(0, cb, 1000);
+        const cache = new ExpiryCacheNullable<number, typeof cb>(null, cb, 1000);
 
         const future = Date.now() + 5000;
         await cache.refreshExpiresAt(future);

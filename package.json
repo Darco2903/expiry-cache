@@ -1,6 +1,6 @@
 {
     "name": "expiry-cache",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "author": "Darco2903",
     "description": "",
     "keywords": [],
@@ -8,7 +8,7 @@
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "type": "module",
-    "packageManager": "pnpm@10.22.0",
+    "packageManager": "pnpm@10.24.0",
     "scripts": {
         "build": "tsc",
         "prepack": "pnpm build",

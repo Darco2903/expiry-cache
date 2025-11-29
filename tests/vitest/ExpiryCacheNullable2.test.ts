@@ -1,36 +1,35 @@
 import { describe, it, expect, vi } from "vitest";
-import { ExpiryCache } from "../../src/ExpiryCache";
+import { ExpiryCacheNullable } from "../../src/ExpiryCacheNullable";
 
 function wait(ms: number) {
     return new Promise((r) => setTimeout(r, ms));
 }
 
-describe("ExpiryCache", () => {
-    it("constructs with various types and respects initial state", async () => {
-        const n = new ExpiryCache(10, () => 1, 1000);
-        expect(n).toBeInstanceOf(ExpiryCache);
+describe("ExpiryCacheNullable", () => {
+    it("constructs with various types and respects initial state", () => {
+        const n = new ExpiryCacheNullable(10, () => 1, 1000);
+        expect(n).toBeInstanceOf(ExpiryCacheNullable);
         expect(n.expirationTime).toBe(1000);
         expect(n.isExpired).toBe(false);
         expect(n.doesExpire).toBe(true);
 
-        const s = new ExpiryCache("str", () => "x");
+        const s = new ExpiryCacheNullable("str", () => "x");
         expect(s.getData()).toBe("str");
 
-        const o = new ExpiryCache({ a: 1 }, () => ({ a: 2 }), 5000);
+        const o = new ExpiryCacheNullable({ a: 1 }, () => ({ a: 2 }), 5000);
         expect(o.getData()).toEqual({ a: 1 });
 
-        const un = new ExpiryCache<number, () => number>(0, () => 10, 1);
-        await wait(10); // let it expire
+        const un = new ExpiryCacheNullable<number, () => number>(null, () => 10, 5000);
         expect(un.isExpired).toBe(true);
         expect(un.getData()).toBeNull();
 
-        const never = new ExpiryCache(1, () => 2, 0);
+        const never = new ExpiryCacheNullable(1, () => 2, 0);
         expect(never.doesExpire).toBe(false);
         expect(never.timeToLive).toBeNull();
     });
 
     it("expires after TTL and refresh resets expiration", async () => {
-        const cache = new ExpiryCache(10, () => 1, 200);
+        const cache = new ExpiryCacheNullable(10, () => 1, 200);
         expect(cache.getData()).toBe(10);
 
         await wait(250);
@@ -45,7 +44,7 @@ describe("ExpiryCache", () => {
     });
 
     it("setExpiresAt and setExpiresIn behave as absolute expirations", async () => {
-        const cache = new ExpiryCache(1, () => 2, 1000);
+        const cache = new ExpiryCacheNullable(1, () => 2, 1000);
         const ts = Date.now() + 3000;
         cache.setExpiresAt(ts);
         expect(cache.expiresAt).toBe(ts);
@@ -55,8 +54,10 @@ describe("ExpiryCache", () => {
     });
 
     it("invalidate, expire and neverExpire behave correctly", () => {
-        const cache = new ExpiryCache(42, () => 0, 1000);
-        cache.expire();
+        const cache = new ExpiryCacheNullable(42, () => 0, 1000);
+        expect(cache.hasData).toBe(true);
+        cache.invalidate();
+        expect(cache.hasData).toBe(false);
         expect(cache.isExpired).toBe(true);
 
         cache.neverExpire();
@@ -65,7 +66,7 @@ describe("ExpiryCache", () => {
 
     it("refresh and getDataOrRefresh update value and preserve old data on error", async () => {
         const success = vi.fn(async () => 99);
-        const cache = new ExpiryCache<number, typeof success>(0, success, 50);
+        const cache = new ExpiryCacheNullable<number, typeof success>(null, success, 50);
         await cache.refresh();
         expect(success).toHaveBeenCalledOnce();
         expect(cache.getData()).toBe(99);
@@ -82,8 +83,7 @@ describe("ExpiryCache", () => {
 
     it("getDataOrRefresh triggers refresh when expired and supports args", async () => {
         const cb = vi.fn(async (v: number) => v);
-        const cache = new ExpiryCache<number, typeof cb>(0, cb, 5000);
-        cache.expire();
+        const cache = new ExpiryCacheNullable<number, typeof cb>(null, cb, 5000);
         const v = await cache.getDataOrRefresh(123);
         expect(v).toBe(123);
         expect(cache.getData()).toBe(123);
@@ -96,8 +96,7 @@ describe("ExpiryCache", () => {
             await wait(20);
             return 7;
         });
-        const cache = new ExpiryCache<number, typeof cb>(0, cb, 1);
-        await wait(10); // let it expire
+        const cache = new ExpiryCacheNullable<number, typeof cb>(null, cb, 1000);
 
         const [a, b, c] = await Promise.all([cache.getDataOrRefresh(), cache.getDataOrRefresh(), cache.getDataOrRefresh()]);
         expect(calls).toBe(1);
