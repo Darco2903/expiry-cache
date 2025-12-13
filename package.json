@@ -1,5 +1,5 @@
 {
-    "name": "expiry-cache",
+    "name": "@darco2903/expiry-cache",
     "version": "1.2.0",
     "author": "Darco2903",
     "description": "",
@@ -8,13 +8,16 @@
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "type": "module",
-    "packageManager": "pnpm@10.24.0",
+    "packageManager": "pnpm@10.25.0",
+    "publishConfig": {
+        "registry": "https://npm.pkg.github.com"
+    },
     "scripts": {
         "build": "tsc",
         "prepack": "pnpm build",
         "test": "vitest",
         "test:ui": "vitest --ui",
-        "clean": "rimraf -g dist expiry-cache-*.tgz"
+        "clean": "rimraf -g dist darco2903-expiry-cache-*.tgz"
     },
     "devDependencies": {
         "@types/node": "^24.10.1",
