@@ -1,10 +1,10 @@
-import type { RefreshFunction } from "./types.js";
+import type { RefreshFunctionNullable } from "./types.js";
 
-export class ExpiryCacheNullable<T, U extends RefreshFunction<T>> {
+export class ExpiryCacheNullable<T, U extends RefreshFunctionNullable<T>> {
     protected data: T | null;
     public readonly expirationTime: number;
     protected callback: U;
-    protected _refreshCb: Promise<T> | null;
+    protected _refreshCb: Promise<T | null> | null;
 
     /** The expiration timestamp in milliseconds. 0 means never expires, -1 means already expired or no data. */
     protected _expiresAt: number;
@@ -157,7 +157,12 @@ export class ExpiryCacheNullable<T, U extends RefreshFunction<T>> {
         } else {
             this._refreshCb = Promise.resolve(this.callback(...args));
             try {
-                this.setData(await this._refreshCb);
+                const newData = await this._refreshCb;
+                if (newData === null) {
+                    this.invalidate();
+                } else {
+                    this.setData(newData);
+                }
             } finally {
                 this._refreshCb = null;
             }
@@ -186,7 +191,12 @@ export class ExpiryCacheNullable<T, U extends RefreshFunction<T>> {
      * @param expiresAt The new expiration timestamp in milliseconds.
      */
     public async refreshExpiresAt(expiresAt: number, ...args: Parameters<U>): Promise<void> {
-        this.setDataExpiresAt(await this.callback(...args), expiresAt);
+        const r = await this.callback(...args);
+        if (r === null) {
+            this.invalidate();
+        } else {
+            this.setDataExpiresAt(r, expiresAt);
+        }
     }
 
     /**
@@ -194,6 +204,11 @@ export class ExpiryCacheNullable<T, U extends RefreshFunction<T>> {
      * @param expirationTime The new expiration time in milliseconds.
      */
     public async refreshExpiresIn(expirationTime: number, ...args: Parameters<U>): Promise<void> {
-        this.setDataExpiresIn(await this.callback(...args), expirationTime);
+        const r = await this.callback(...args);
+        if (r === null) {
+            this.invalidate();
+        } else {
+            this.setDataExpiresIn(r, expirationTime);
+        }
     }
 }

@@ -9,6 +9,16 @@ describe("ExpiryCacheNullable", () => {
         expect(cache.getData()).toBeNull();
     });
 
+    it("refresh function returns nullable", async () => {
+        const cb: () => number | null = vi.fn(() => null);
+        const cache = new ExpiryCacheNullable<number, () => number | null>(0, cb, 1000);
+        expect(cache.getData()).toBe(0);
+        
+        await cache.refresh();
+        expect(cb).toHaveBeenCalled();
+        expect(cache.getData()).toBeNull();
+    });
+
     it("constructor sets never-expire when expirationTime is 0", () => {
         const cache = new ExpiryCacheNullable<number, () => number>(1, () => 2, 0);
         expect(cache.doesExpire).toBe(false);
@@ -44,9 +54,7 @@ describe("ExpiryCacheNullable", () => {
     });
 
     it("refresh updates data and expiration", async () => {
-        const cb = vi.fn(async () => {
-            return 99;
-        });
+        const cb = vi.fn(async () => 99);
         const cache = new ExpiryCacheNullable<number, typeof cb>(null, cb, 50);
         await cache.refresh();
         expect(cb).toHaveBeenCalledTimes(1);
