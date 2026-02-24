@@ -6,7 +6,7 @@ A simple in-memory cache with expiry functionality. It allows you to store data 
 
 ## Installation
 
-You can found the package here: [**@darco2903/expiry-cache**](https://github.com/users/Darco2903/packages/npm/package/expiry-cache)
+You can find the package here: [**@darco2903/expiry-cache**](https://github.com/users/Darco2903/packages/npm/package/expiry-cache)
 
 ## Example Usage
 
