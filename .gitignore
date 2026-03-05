@@ -1,6 +1,8 @@
 node_modules/
 .vscode/
 dist/
+*_
+*_.*
 
 # tarballs
 darco2903-expiry-cache-*.tgz

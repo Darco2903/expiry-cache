@@ -8,9 +8,12 @@
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "type": "module",
-    "packageManager": "pnpm@10.25.0",
+    "packageManager": "pnpm@10.30.3",
+    "repository": {
+        "url": "https://github.com/Darco2903/web-common.git"
+    },
     "publishConfig": {
-        "registry": "https://npm.pkg.github.com"
+        "access": "public"
     },
     "scripts": {
         "build": "tsc",
@@ -19,10 +22,12 @@
         "test:ui": "vitest --ui",
         "clean": "rimraf -g dist darco2903-expiry-cache-*.tgz"
     },
+    "peerDependencies": {
+        "@darco2903/secondthought": "^1.1.0"
+    },
     "devDependencies": {
-        "@types/node": "^24.10.1",
+        "@darco2903/web-common": "^0.7.0",
         "@vitest/ui": "^3.2.4",
-        "happy-dom": "^18.0.1",
         "rimraf": "^6.1.0",
         "typescript": "^5.9.3",
         "vitest": "^3.2.4"
