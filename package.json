@@ -1,6 +1,6 @@
 {
     "name": "@darco2903/expiry-cache",
-    "version": "1.2.1",
+    "version": "2.0.0-beta.0",
     "author": "Darco2903",
     "description": "",
     "keywords": [],
@@ -10,7 +10,7 @@
     "type": "module",
     "packageManager": "pnpm@10.30.3",
     "repository": {
-        "url": "https://github.com/Darco2903/web-common.git"
+        "url": "https://github.com/Darco2903/expiry-cache.git"
     },
     "publishConfig": {
         "access": "public"
