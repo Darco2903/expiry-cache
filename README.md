@@ -4,9 +4,13 @@
 
 A simple in-memory cache with expiry functionality. It allows you to store data that automatically expires after a specified duration, with support for synchronous and asynchronous data fetching.
 
+> Note: This package utilizes the [**@darco2903/secondthought**](https://www.npmjs.com/package/@darco2903/secondthought) package for time-related operations, providing enhanced capabilities for handling and manipulating time-related data. While its use is not mandatory, it is recommended for optimal safety and reliability when working with time values.
+
 ## Installation
 
-You can find the package here: [**@darco2903/expiry-cache**](https://github.com/users/Darco2903/packages/npm/package/expiry-cache)
+```bash
+npm install @darco2903/web-common
+```
 
 ## Example Usage
 
@@ -29,7 +33,7 @@ console.log(cache.getData()); // Outputs: string
 ### With Async Fetcher
 
 ```ts
-import { ExpiryCache } from "@darco2903/expiry-cache";
+import { ExpiryCacheAsync } from "@darco2903/expiry-cache";
 
 async function getApiData(): Promise<string> {
     // Simulating an API call
@@ -40,7 +44,7 @@ async function getApiData(): Promise<string> {
     });
 }
 
-const cache = new ExpiryCache("initial data", getApiData, 5000);
+const cache = new ExpiryCacheAsync("initial data", getApiData, 5000);
 
 await cache.refresh();
 console.log(cache.getData()); // Outputs: fetched data from API
