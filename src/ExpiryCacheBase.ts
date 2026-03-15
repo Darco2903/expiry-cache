@@ -1,20 +1,45 @@
-import { type Time, Millisecond, Minute } from "@darco2903/secondthought";
+import { Time, Millisecond, Minute } from "@darco2903/secondthought";
 import type { RefreshFunction, RefreshFunctionAsync } from "./types.js";
 
 export abstract class ExpiryCacheBase<T, U extends RefreshFunction<T> | RefreshFunctionAsync<T>> {
+    /** The cached data. */
     protected data: T;
+
+    /** The function to refresh the cached data. */
     protected callback: U;
 
-    public readonly expirationTime: number;
+    /** The time in milliseconds after which the cache expires. 0 means never expires. */
+    protected _expirationTime: Millisecond;
 
     /** The expiration timestamp in milliseconds. 0 means never expires, -1 means already expired or no data. */
     protected _expiresAt: Millisecond;
+
+    /**
+     * Gets the expiration time in milliseconds. This is the duration after which the cache expires, not the absolute expiration timestamp.
+     */
+    public get expirationTime(): number {
+        return this._expirationTime.time;
+    }
+
+    /**
+     * Gets the expiration time as a Millisecond object. This is the duration after which the cache expires, not the absolute expiration timestamp.
+     */
+    public get expirationTimeAsTime(): Millisecond {
+        return this._expirationTime;
+    }
 
     /**
      * Gets the expiration timestamp in milliseconds.
      */
     public get expiresAt(): number {
         return this._expiresAt.time;
+    }
+
+    /**
+     * Gets the expiration timestamp as a Millisecond object.
+     */
+    public get expiresAtAsTime(): Millisecond {
+        return this._expiresAt;
     }
 
     /**
@@ -32,11 +57,21 @@ export abstract class ExpiryCacheBase<T, U extends RefreshFunction<T> | RefreshF
     }
 
     /**
-     * Gets the time to live (TTL) in milliseconds.
+     * Gets the time to live (TTL) in milliseconds. Returns null if the cache does not expire.
      */
     public get timeToLive(): number | null {
         if (this.doesExpire) {
             return Math.max(0, this._expiresAt.clone().sub(Millisecond.now()).time);
+        }
+        return null;
+    }
+
+    /**
+     * Gets the time to live (TTL) as a Millisecond object. Returns null if the cache does not expire.
+     */
+    public get timeToLiveAsTime(): Millisecond | null {
+        if (this.doesExpire) {
+            return Time.max(new Millisecond(0), this._expiresAt.clone().sub(Millisecond.now()))!.toMillisecond();
         }
         return null;
     }
@@ -58,7 +93,7 @@ export abstract class ExpiryCacheBase<T, U extends RefreshFunction<T> | RefreshF
         const expTime = this.argToMs(expirationTime);
         this.data = data;
         this._expiresAt = expTime.time === 0 ? expTime : Millisecond.now().add(expTime);
-        this.expirationTime = expTime.time;
+        this._expirationTime = expTime;
         this.callback = callback;
     }
 
@@ -101,7 +136,7 @@ export abstract class ExpiryCacheBase<T, U extends RefreshFunction<T> | RefreshF
      * Sets the cached data and resets the expiration timestamp based on the expiration time.
      */
     protected setData(data: T): void {
-        this.setDataExpiresIn(data, new Millisecond(this.expirationTime));
+        this.setDataExpiresIn(data, this._expirationTime);
     }
 
     /**

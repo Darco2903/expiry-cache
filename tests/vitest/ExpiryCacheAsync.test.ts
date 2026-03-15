@@ -9,6 +9,7 @@ describe("ExpiryCacheAsync", () => {
         expect(cache).toBeInstanceOf(ExpiryCacheAsync);
         expect(cache.getData()).toBe(100);
         expect(cache.expirationTime).toBe(1000);
+        expect(cache.expirationTimeAsTime.equals(new Millisecond(1000))).toBeTruthy();
         expect(cache.isExpired).toBeFalsy();
         expect(cache.doesExpire).toBeTruthy();
         expect(cache.timeToLive).toBeLessThanOrEqual(1000);
@@ -18,6 +19,7 @@ describe("ExpiryCacheAsync", () => {
         const n = new ExpiryCacheAsync(10, async () => 1, 1000);
         expect(n).toBeInstanceOf(ExpiryCacheAsync);
         expect(n.expirationTime).toBe(1000);
+        expect(n.expirationTimeAsTime.equals(new Millisecond(1000))).toBeTruthy();
         expect(n.isExpired).toBe(false);
         expect(n.doesExpire).toBe(true);
 
@@ -40,6 +42,7 @@ describe("ExpiryCacheAsync", () => {
         expect(cache.getData()).toBe(1);
         expect(cache.doesExpire).toBeFalsy();
         expect(cache.timeToLive).toBeNull();
+        expect(cache.timeToLiveAsTime).toBeNull();
     });
 
     it("timeToLive clamps and reports remaining time", () => {
@@ -52,6 +55,7 @@ describe("ExpiryCacheAsync", () => {
         // expire it
         cache.expire();
         expect(cache.timeToLive).toBe(0);
+        expect(cache.timeToLiveAsTime!.equals(new Millisecond(0))).toBeTruthy();
     });
 
     it("should expire naturally after TTL and refresh resets expiration", async () => {
@@ -64,6 +68,7 @@ describe("ExpiryCacheAsync", () => {
         expect(cache.isExpired).toBeTruthy();
         expect(cache.getData()).toBeNull();
         expect(cache.timeToLive).toBe(0);
+        expect(cache.timeToLiveAsTime!.equals(new Millisecond(0))).toBeTruthy();
 
         await cache.refresh();
         expect(cache.isExpired).toBeFalsy();
@@ -107,6 +112,7 @@ describe("ExpiryCacheAsync", () => {
         await cache.refreshExpiresAt(future);
         expect(cache.getData()).toBe(7);
         expect(cache.expiresAt).toBe(future.time);
+        expect(cache.expiresAtAsTime!.equals(future)).toBeTruthy();
 
         // refreshExpiresIn
         await cache.refreshExpiresIn(2000);
