@@ -36,7 +36,7 @@ export abstract class ExpiryCacheBase<T, U extends RefreshFunction<T> | RefreshF
      */
     public get timeToLive(): number | null {
         if (this.doesExpire) {
-            return Math.max(0, this._expiresAt.clone().subtract(Millisecond.now()).time);
+            return Math.max(0, this._expiresAt.clone().sub(Millisecond.now()).time);
         }
         return null;
     }

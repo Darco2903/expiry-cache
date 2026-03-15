@@ -9,12 +9,12 @@ importers:
   .:
     dependencies:
       '@darco2903/secondthought':
-        specifier: ^1.1.0
-        version: 1.2.0
+        specifier: ^1.3.0
+        version: 1.3.0
     devDependencies:
       '@darco2903/web-common':
         specifier: ^0.7.0
-        version: 0.7.0(@darco2903/secondthought@1.2.0)
+        version: 0.7.0(@darco2903/secondthought@1.3.0)
       '@vitest/ui':
         specifier: ^3.2.4
         version: 3.2.4(vitest@3.2.4)
@@ -30,8 +30,8 @@ importers:
 
 packages:
 
-  '@darco2903/secondthought@1.2.0':
-    resolution: {integrity: sha512-NbPkB94DOJUaX3E1Qz4USasQZOgpVfY7AmUEFYj+ZgarjvzkJ0c+4M+bXZ3K1HyZnnfpnizqAiFjsteCXyulfg==}
+  '@darco2903/secondthought@1.3.0':
+    resolution: {integrity: sha512-htul4CNhDJ/4uxvaM+IwTCoQoASn1lC4nPloFZgJRA4Cmb08L/fE1kiuls89svwc4Nt5Ii4k2YNadrCy6O8D8Q==}
 
   '@darco2903/web-common@0.7.0':
     resolution: {integrity: sha512-/iZ6OngdwDKp36g4xfVHqNV4qPQz/QTOUe4hFh7tYfNwOZVl6icd3C+Sm9Lm6u5fNZayyzDo4JKnRX+eNS0/Lw==}
@@ -774,11 +774,11 @@ packages:
 
 snapshots:
 
-  '@darco2903/secondthought@1.2.0': {}
+  '@darco2903/secondthought@1.3.0': {}
 
-  '@darco2903/web-common@0.7.0(@darco2903/secondthought@1.2.0)':
+  '@darco2903/web-common@0.7.0(@darco2903/secondthought@1.3.0)':
     dependencies:
-      '@darco2903/secondthought': 1.2.0
+      '@darco2903/secondthought': 1.3.0
 
   '@esbuild/aix-ppc64@0.25.12':
     optional: true
