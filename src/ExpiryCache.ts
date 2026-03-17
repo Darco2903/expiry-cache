@@ -1,8 +1,12 @@
 import type { Time } from "@darco2903/secondthought";
-import { ExpiryCacheUnsafeBase } from "./base/index.js";
+import { ExpiryCacheSyncBase } from "./base/index.js";
 import type { RefreshFunctionUnsafeSync } from "./types/index.js";
+import type { ExpiryCacheSyncInterface, ExpiryCacheUnsafeInterface } from "./interface/index.js";
 
-export class ExpiryCache<T, U extends RefreshFunctionUnsafeSync<T>> extends ExpiryCacheUnsafeBase<T, U> {
+export class ExpiryCache<T, U extends RefreshFunctionUnsafeSync<T>>
+    extends ExpiryCacheSyncBase<T, U>
+    implements ExpiryCacheSyncInterface<T, U>, ExpiryCacheUnsafeInterface<T, U>
+{
     /**
      * Creates an instance of ExpiryCache.
      */

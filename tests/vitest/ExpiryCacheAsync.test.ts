@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { wait } from "@darco2903/web-common";
 import { Millisecond, Second } from "@darco2903/secondthought";
-import { ExpiryCacheAsync } from "../../src/ExpiryCacheAsync";
+import { ExpiryCacheAsync } from "../../src/index.js";
 
 describe("ExpiryCacheAsync", () => {
     it("should create an instance with correct properties", () => {

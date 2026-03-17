@@ -1,27 +1,12 @@
 import type { Time } from "@darco2903/secondthought";
-import { ExpiryCacheAsyncInterface, ExpiryCacheUnsafeBase } from "./base/index.js";
-import type { RefreshFunctionUnsafeAsync } from "./types/index.js";
+import { ExpiryCacheAsyncBase } from "./base/ExpiryCacheAsyncBase.js";
+import type { RefreshFunctionUnsafeAsync, ReturnTypeUnsafeAsync } from "./types/index.js";
+import type { ExpiryCacheAsyncInterface, ExpiryCacheUnsafeInterface } from "./interface/index.js";
 
 export class ExpiryCacheAsync<T, U extends RefreshFunctionUnsafeAsync<T>>
-    extends ExpiryCacheUnsafeBase<T, U>
-    implements ExpiryCacheAsyncInterface<T, U>
+    extends ExpiryCacheAsyncBase<T, U, ReturnTypeUnsafeAsync<T>>
+    implements ExpiryCacheAsyncInterface<T, U>, ExpiryCacheUnsafeInterface<T, U>
 {
-    /** The promise of the current refresh operation, or null if no refresh is in progress. */
-    protected _refreshCb: Promise<T> | null;
-
-    /** Indicates whether the cache is currently being refreshed. */
-    public get refreshing(): boolean {
-        return this._refreshCb !== null;
-    }
-
-    /**
-     * Creates an instance of ExpiryCacheAsync.
-     */
-    constructor(data: T, callback: U, expirationTime?: number | Time) {
-        super(data, callback, expirationTime);
-        this._refreshCb = null;
-    }
-
     public async refresh(...args: Parameters<U>): Promise<T> {
         if (this.refreshing) {
             await this._refreshCb;

@@ -1,3 +1,2 @@
-export * from "./ExpiryCacheAsyncInterface.js";
-export * from "./ExpiryCacheSafeBase.js";
-export * from "./ExpiryCacheUnsafeBase.js";
+export * from "./ExpiryCacheAsyncBase.js";
+export * from "./ExpiryCacheSyncBase.js";

@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import { err, ok } from "neverthrow";
 import { wait } from "@darco2903/web-common";
 import { Millisecond, Second } from "@darco2903/secondthought";
-import { ExpiryCacheSafe } from "../../src/ExpiryCacheSafe";
+import { ExpiryCacheSafe } from "../../src/index.js";
 
 describe("ExpiryCacheSafe", () => {
     it("should create an instance with correct properties", () => {
