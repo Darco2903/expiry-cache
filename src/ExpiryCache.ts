@@ -1,23 +1,18 @@
-import { type Time, Minute } from "@darco2903/secondthought";
-import { ExpiryCacheBase } from "./ExpiryCacheBase.js";
-import type { RefreshFunction } from "./types.js";
+import type { Time } from "@darco2903/secondthought";
+import { ExpiryCacheUnsafeBase } from "./base/index.js";
+import type { RefreshFunctionUnsafeSync } from "./types/index.js";
 
-export class ExpiryCache<T, U extends RefreshFunction<T>> extends ExpiryCacheBase<T, U> {
+export class ExpiryCache<T, U extends RefreshFunctionUnsafeSync<T>> extends ExpiryCacheUnsafeBase<T, U> {
     /**
      * Creates an instance of ExpiryCache.
-     * @param data  The initial data to be cached.
-     * @param callback The function to refresh the cached data.
-     * @param expirationTime The time in milliseconds after which the cache expires. Defaults to 60_000 (1 minute). If set to 0, the cache will never expire.
      */
-    constructor(data: T, callback: U, expirationTime: number | Time = new Minute(1)) {
+    constructor(data: T, callback: U, expirationTime?: number | Time) {
         super(data, callback, expirationTime);
     }
 
-    /**
-     * Refreshes the cached data using the callback function.
-     */
-    public refresh(...args: Parameters<U>): void {
+    public refresh(...args: Parameters<U>): T {
         this.setData(this.callback(...args));
+        return this.data;
     }
 
     public getDataOrRefresh(...args: Parameters<U>): T {
@@ -27,21 +22,15 @@ export class ExpiryCache<T, U extends RefreshFunction<T>> extends ExpiryCacheBas
         return this.data;
     }
 
-    /**
-     * Refreshes the cached data and sets a new expiration timestamp.
-     * @param expiresAt The new expiration timestamp in milliseconds.
-     */
-    public refreshExpiresAt(expiresAt: number | Time, ...args: Parameters<U>): void {
+    public refreshExpiresAt(expiresAt: number | Time, ...args: Parameters<U>): T {
         const expAt = this.argToMs(expiresAt);
         this.setDataExpiresAt(this.callback(...args), expAt);
+        return this.data;
     }
 
-    /**
-     * Refreshes the cached data and sets a new expiration time.
-     * @param expirationTime The new expiration time in milliseconds.
-     */
-    public refreshExpiresIn(expirationTime: number | Time, ...args: Parameters<U>): void {
+    public refreshExpiresIn(expirationTime: number | Time, ...args: Parameters<U>): T {
         const expTime = this.argToMs(expirationTime);
         this.setDataExpiresIn(this.callback(...args), expTime);
+        return this.data;
     }
 }

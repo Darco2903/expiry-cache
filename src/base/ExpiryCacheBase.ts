@@ -1,7 +1,7 @@
 import { Time, Millisecond, Minute } from "@darco2903/secondthought";
-import type { RefreshFunction, RefreshFunctionAsync } from "./types.js";
+import type { RefreshFunction, ReturnType } from "../types/index.js";
 
-export abstract class ExpiryCacheBase<T, U extends RefreshFunction<T> | RefreshFunctionAsync<T>> {
+export abstract class ExpiryCacheBase<T, U extends RefreshFunction<T, V>, V = any> {
     /** The cached data. */
     protected data: T;
 
@@ -111,6 +111,10 @@ export abstract class ExpiryCacheBase<T, U extends RefreshFunction<T> | RefreshF
         this._expiresAt = new Millisecond(0);
     }
 
+    /**
+     * Calculates the expiration timestamp based on the current time plus the given milliseconds. If ms is 0, it returns 0 to indicate never expires.
+     * @param ms The time in milliseconds after which the cache should expire. If set to 0, the cache will never expire.
+     */
     protected expIn(ms: Millisecond): Millisecond {
         return ms.time === 0 ? ms : Millisecond.now().add(ms);
     }
@@ -126,7 +130,7 @@ export abstract class ExpiryCacheBase<T, U extends RefreshFunction<T> | RefreshF
 
     /**
      * Sets the expiration timestamp to a specific time.
-     * @param timestamp The expiration timestamp in milliseconds.
+     * @param timestamp The expiration timestamp in milliseconds or as a Time object. If set to 0, the cache will never expire.
      */
     public setExpiresAt(timestamp: number | Time): void {
         this._expiresAt = this.argToMs(timestamp);
@@ -134,6 +138,7 @@ export abstract class ExpiryCacheBase<T, U extends RefreshFunction<T> | RefreshF
 
     /**
      * Sets the cached data and resets the expiration timestamp based on the expiration time.
+     * @param data The new data to be cached.
      */
     protected setData(data: T): void {
         this.setDataExpiresIn(data, this._expirationTime);
@@ -141,7 +146,7 @@ export abstract class ExpiryCacheBase<T, U extends RefreshFunction<T> | RefreshF
 
     /**
      * Sets the cached data and sets a new expiration timestamp.
-     * @param expiresAt The new expiration timestamp in milliseconds.
+     * @param expiresAt The new expiration timestamp in milliseconds. If set to 0, the cache will never expire.
      */
     protected setDataExpiresAt(data: T, expiresAt: Millisecond): void {
         this.data = data;
@@ -150,7 +155,7 @@ export abstract class ExpiryCacheBase<T, U extends RefreshFunction<T> | RefreshF
 
     /**
      * Sets the cached data and sets a new expiration time.
-     * @param expirationTime The new expiration time in milliseconds.
+     * @param expirationTime The new expiration time in milliseconds. If set to 0, the cache will never expire.
      */
     protected setDataExpiresIn(data: T, expirationTime: Millisecond): void {
         this.setDataExpiresAt(data, this.expIn(expirationTime));
@@ -174,24 +179,22 @@ export abstract class ExpiryCacheBase<T, U extends RefreshFunction<T> | RefreshF
     }
 
     /**
-     * Refreshes the cached data using the callback function.
+     * @param args The arguments to pass to the refresh function.
      */
-    public abstract refresh(...args: Parameters<U>): void | Promise<void>;
+    public abstract refresh(...args: Parameters<U>): ReturnType<T, V>;
 
     /**
-     * Gets the cached data or refreshes it if expired.
+     * @param args The arguments to pass to the refresh function in case the cache is expired.
      */
-    public abstract getDataOrRefresh(...args: Parameters<U>): T | Promise<T>;
+    public abstract getDataOrRefresh(...args: Parameters<U>): ReturnType<T, V>;
 
     /**
-     * Refreshes the cached data and sets a new expiration timestamp.
-     * @param expiresAt The new expiration timestamp in milliseconds.
+     * @param expiresAt The new expiration timestamp in milliseconds or as a Time object.
      */
-    public abstract refreshExpiresAt(expiresAt: number | Time, ...args: Parameters<U>): void | Promise<void>;
+    public abstract refreshExpiresAt(expiresAt: number | Time, ...args: Parameters<U>): ReturnType<T, V>;
 
     /**
-     * Refreshes the cached data and sets a new expiration time.
-     * @param expirationTime The new expiration time in milliseconds.
+     * @param expirationTime The new expiration time in milliseconds or as a Time object.
      */
-    public abstract refreshExpiresIn(expirationTime: number | Time, ...args: Parameters<U>): void | Promise<void>;
+    public abstract refreshExpiresIn(expirationTime: number | Time, ...args: Parameters<U>): ReturnType<T, V>;
 }
