@@ -21,11 +21,13 @@ export class ExpiryCacheSafeAsync<T, F extends RefreshFunctionSafeAsync<T, E>, E
             return this._refreshCb
                 .andTee((res) => this.setData(res))
                 .map(ExpiryCacheSafeAsync.mapRefreshReturn<T>)
-                .andTee(() => {
+                .andTee((data) => {
                     this._refreshCb = null;
+                    this.emitter.emit("refreshed", data);
                 })
-                .orTee(() => {
+                .orTee((err) => {
                     this._refreshCb = null;
+                    this.emitter.emit("error", err);
                 });
         }
     }

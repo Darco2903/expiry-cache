@@ -1,4 +1,3 @@
-import type { Time } from "@darco2903/secondthought";
 import { ExpiryCacheSyncBase } from "./base/index.js";
 import type { RefreshFunctionUnsafeSync } from "./types/index.js";
 import type { ExpiryCacheSyncInterface, ExpiryCacheUnsafeInterface } from "./interface/index.js";
@@ -8,17 +7,11 @@ export class ExpiryCache<T, F extends RefreshFunctionUnsafeSync<T>>
     implements ExpiryCacheSyncInterface<T, F>, ExpiryCacheUnsafeInterface<T, F>
 {
     /**
-     * Creates an instance of ExpiryCache.
-     */
-    constructor(data: T, callback: F, expirationTime?: number | Time) {
-        super(data, callback, expirationTime);
-    }
-
-    /**
      * Refreshes the cache by calling the refresh function with the provided arguments and updates the cache data. Returns the updated cache data.
      */
     public refresh(...args: Parameters<F>): T {
         this.setData(this.refreshFn(...args));
+        this.emitter.emit("refreshed", this.data);
         return this.data;
     }
 

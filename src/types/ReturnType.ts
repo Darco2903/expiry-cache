@@ -15,4 +15,4 @@ export type ReturnTypeSync<T, U> = ReturnTypeUnsafeSync<T> | ReturnTypeSafeSync<
 export type ReturnTypeAsync<T, U> = ReturnTypeUnsafeAsync<T> | ReturnTypeSafeAsync<T, U>;
 
 // All-in-one union
-export type ReturnType<T, U> = ReturnTypeUnsafe<T> | ReturnTypeSafe<T, U>;
+export type CacheReturnType<T, U> = ReturnTypeUnsafe<T> | ReturnTypeSafe<T, U>;

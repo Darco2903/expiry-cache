@@ -196,3 +196,55 @@ describe("ExpiryCacheSafeAsync with return options", () => {
         expect(cache.timeToLive).toBeLessThanOrEqual(100);
     });
 });
+
+describe("ExpiryCacheSafeAsync expire event", () => {
+    it("should emit expire event when cache expires", async () => {
+        const cache = new ExpiryCacheSafeAsync(10, () => okAsync(0), 50);
+        const start = Millisecond.now();
+        let elapsed = 0;
+        const expiredCallback = vi.fn(() => {
+            elapsed = Millisecond.now().sub(start).time;
+        });
+        cache.emitter.on("expired", expiredCallback);
+        expect(expiredCallback).toHaveBeenCalledTimes(0);
+
+        await wait(100);
+        expect(expiredCallback).toHaveBeenCalledTimes(1);
+        expect(elapsed).toBeGreaterThanOrEqual(50);
+    });
+
+    it("should emit expire event when cache expires after being refreshed", async () => {
+        const cache = new ExpiryCacheSafeAsync(10, () => okAsync(0), 50);
+
+        cache.refresh();
+
+        const start = Millisecond.now();
+        let elapsed = 0;
+        const expiredCallback = vi.fn(() => {
+            elapsed = Millisecond.now().sub(start).time;
+        });
+        cache.emitter.on("expired", expiredCallback);
+        expect(expiredCallback).toHaveBeenCalledTimes(0);
+
+        await wait(100);
+
+        expect(expiredCallback).toHaveBeenCalledTimes(1);
+        expect(elapsed).toBeGreaterThanOrEqual(50);
+    });
+});
+
+describe("ExpiryCacheSafeAsync refreshed event", () => {
+    it("should emit refreshed event when cache is refreshed", () => {
+        const cache = new ExpiryCacheSafeAsync(10, () => okAsync(0), 1000);
+        let result: number | null = null;
+        const refreshedCallback = vi.fn((data: number) => {
+            result = data;
+        });
+        cache.emitter.on("refreshed", refreshedCallback);
+        expect(refreshedCallback).toHaveBeenCalledTimes(0);
+
+        cache.refresh();
+        expect(refreshedCallback).toHaveBeenCalledTimes(1);
+        expect(result).toBe(0);
+    });
+});

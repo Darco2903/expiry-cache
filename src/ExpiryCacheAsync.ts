@@ -17,6 +17,7 @@ export class ExpiryCacheAsync<T, F extends RefreshFunctionUnsafeAsync<T>>
         } else {
             this._refreshCb = this.refreshFn(...args);
             this.setData(await this._refreshCb);
+            this.emitter.emit("refreshed", this.data);
             this._refreshCb = null;
         }
         return this.data;

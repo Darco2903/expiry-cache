@@ -13,8 +13,14 @@ export class ExpiryCacheSafe<T, F extends RefreshFunctionSafeSync<T, E>, E>
      */
     public refresh(...args: Parameters<F>): Result<T, E> {
         return this.refreshFn(...args)
-            .andTee(this.setData.bind(this))
-            .map(ExpiryCacheSyncBase.mapRefreshReturn<T>);
+            .andTee((data) => this.setData(data))
+            .map(ExpiryCacheSyncBase.mapRefreshReturn<T>)
+            .andTee((data) => {
+                this.emitter.emit("refreshed", this.data);
+            })
+            .orTee((err) => {
+                this.emitter.emit("error", err);
+            });
     }
 
     /**

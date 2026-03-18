@@ -1,6 +1,8 @@
 import { Time, Millisecond, Minute } from "@darco2903/secondthought";
-import type { RefreshFunction, ReturnType } from "../types/index.js";
-import { ReturnOptions, ReturnOptionsBase, ReturnOptionsExpiresAtClass, ReturnOptionsExpiresInClass } from "../ReturnOptions.js";
+import { TypedEmitter } from "@darco2903/typed-emitter";
+import type { RefreshFunction, CacheReturnType } from "../types/index.js";
+import { type ReturnOptions, ReturnOptionsBase, ReturnOptionsExpiresAtClass, ReturnOptionsExpiresInClass } from "../ReturnOptions.js";
+import type { CacheEvents } from "../types/events.js";
 
 export abstract class ExpiryCacheBase<T, F extends RefreshFunction<T, E>, E = any> {
     /** The cached data. */
@@ -8,6 +10,11 @@ export abstract class ExpiryCacheBase<T, F extends RefreshFunction<T, E>, E = an
 
     /** The function to refresh the cached data. */
     protected refreshFn: F;
+
+    /** The event emitter for cache events. */
+    public readonly emitter: TypedEmitter<CacheEvents<T, E>>;
+
+    private _expirationTimeout: ReturnType<typeof setTimeout> | null;
 
     /** The time in milliseconds after which the cache expires. 0 means never expires. */
     protected _expirationTime: Millisecond;
@@ -87,15 +94,18 @@ export abstract class ExpiryCacheBase<T, F extends RefreshFunction<T, E>, E = an
     /**
      * Creates an instance of ExpiryCache.
      * @param data  The initial data to be cached.
-     * @param callback The function to refresh the cached data.
+     * @param refreshFn The function to refresh the cached data.
      * @param expirationTime The time in milliseconds after which the cache expires. Defaults to 60_000 (1 minute). If set to 0, the cache will never expire.
      */
-    constructor(data: T, callback: F, expirationTime: number | Time = new Minute(1)) {
+    constructor(data: T, refreshFn: F, expirationTime: number | Time = new Minute(1)) {
         const expTime = this.argToMs(expirationTime);
         this.data = data;
         this._expiresAt = expTime.time === 0 ? expTime : Millisecond.now().add(expTime);
         this._expirationTime = expTime;
-        this.refreshFn = callback;
+        this.refreshFn = refreshFn;
+        this.emitter = new TypedEmitter();
+        this._expirationTimeout = null;
+        this.setExpirationTimeout();
     }
 
     /**
@@ -103,6 +113,7 @@ export abstract class ExpiryCacheBase<T, F extends RefreshFunction<T, E>, E = an
      */
     public expire(): void {
         this._expiresAt = new Millisecond(-1);
+        this.emitter.emit("expired");
     }
 
     /**
@@ -110,6 +121,19 @@ export abstract class ExpiryCacheBase<T, F extends RefreshFunction<T, E>, E = an
      */
     public neverExpire(): void {
         this._expiresAt = new Millisecond(0);
+    }
+
+    private setExpirationTimeout(): void {
+        if (this._expirationTimeout) {
+            clearTimeout(this._expirationTimeout);
+        }
+
+        if (this.timeToLive !== null) {
+            this._expirationTimeout = setTimeout(() => {
+                this._expirationTimeout = null;
+                this.emitter.emit("expired");
+            }, this.timeToLive);
+        }
     }
 
     /**
@@ -127,6 +151,7 @@ export abstract class ExpiryCacheBase<T, F extends RefreshFunction<T, E>, E = an
     public setExpiresIn(ms: number | Time): void {
         const t = this.argToMs(ms);
         this._expiresAt = this.expIn(t);
+        this.setExpirationTimeout();
     }
 
     /**
@@ -135,6 +160,7 @@ export abstract class ExpiryCacheBase<T, F extends RefreshFunction<T, E>, E = an
      */
     public setExpiresAt(timestamp: number | Time): void {
         this._expiresAt = this.argToMs(timestamp);
+        this.setExpirationTimeout();
     }
 
     /**
@@ -171,6 +197,7 @@ export abstract class ExpiryCacheBase<T, F extends RefreshFunction<T, E>, E = an
     protected setDataExpiresAt(data: T, expiresAt: Millisecond): void {
         this.data = data;
         this._expiresAt = expiresAt;
+        this.setExpirationTimeout();
     }
 
     /**
@@ -201,10 +228,10 @@ export abstract class ExpiryCacheBase<T, F extends RefreshFunction<T, E>, E = an
     /**
      * @param args The arguments to pass to the refresh function.
      */
-    public abstract refresh(...args: Parameters<F>): ReturnType<T, E>;
+    public abstract refresh(...args: Parameters<F>): CacheReturnType<T, E>;
 
     /**
      * @param args The arguments to pass to the refresh function in case the cache is expired.
      */
-    public abstract getDataOrRefresh(...args: Parameters<F>): ReturnType<T, E>;
+    public abstract getDataOrRefresh(...args: Parameters<F>): CacheReturnType<T, E>;
 }

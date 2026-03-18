@@ -11,6 +11,9 @@ importers:
       '@darco2903/secondthought':
         specifier: ^1.3.0
         version: 1.3.0
+      '@darco2903/typed-emitter':
+        specifier: ^1.3.1
+        version: 1.3.1(@darco2903/secondthought@1.3.0)
       neverthrow:
         specifier: ^8.2.0
         version: 8.2.0
@@ -32,6 +35,11 @@ packages:
 
   '@darco2903/secondthought@1.3.0':
     resolution: {integrity: sha512-htul4CNhDJ/4uxvaM+IwTCoQoASn1lC4nPloFZgJRA4Cmb08L/fE1kiuls89svwc4Nt5Ii4k2YNadrCy6O8D8Q==}
+
+  '@darco2903/typed-emitter@1.3.1':
+    resolution: {integrity: sha512-f0/TFgQQt6P7htSR7Zc7ZEtsMWu+Nqf31hnlbfhl0aV2sZHi3zMVfLehQsvPMz5vzhfjCTTsKqi09Of+VBSYCw==}
+    peerDependencies:
+      '@darco2903/secondthought': ^1.1.0
 
   '@darco2903/web-common@0.7.0':
     resolution: {integrity: sha512-/iZ6OngdwDKp36g4xfVHqNV4qPQz/QTOUe4hFh7tYfNwOZVl6icd3C+Sm9Lm6u5fNZayyzDo4JKnRX+eNS0/Lw==}
@@ -779,6 +787,11 @@ packages:
 snapshots:
 
   '@darco2903/secondthought@1.3.0': {}
+
+  '@darco2903/typed-emitter@1.3.1(@darco2903/secondthought@1.3.0)':
+    dependencies:
+      '@darco2903/secondthought': 1.3.0
+      neverthrow: 8.2.0
 
   '@darco2903/web-common@0.7.0(@darco2903/secondthought@1.3.0)':
     dependencies:
