@@ -1,9 +1,10 @@
 import { ExpiryCacheSyncBase } from "./base/index.js";
 import type { RefreshFunctionUnsafeSync } from "./types/index.js";
 import type { ExpiryCacheSyncInterface, ExpiryCacheUnsafeInterface } from "./interface/index.js";
+import type { CacheEventsUnsafe } from "./types/events.js";
 
 export class ExpiryCache<T, F extends RefreshFunctionUnsafeSync<T>>
-    extends ExpiryCacheSyncBase<T, F>
+    extends ExpiryCacheSyncBase<T, F, CacheEventsUnsafe<T>>
     implements ExpiryCacheSyncInterface<T, F>, ExpiryCacheUnsafeInterface<T, F>
 {
     /**
@@ -11,7 +12,7 @@ export class ExpiryCache<T, F extends RefreshFunctionUnsafeSync<T>>
      */
     public refresh(...args: Parameters<F>): T {
         this.setData(this.refreshFn(...args));
-        this.emitter.emit("refreshed", this.data);
+        this._emit("refreshed", this.data);
         return this.data;
     }
 

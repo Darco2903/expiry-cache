@@ -1,10 +1,11 @@
 import { ExpiryCacheAsyncBase } from "./base/index.js";
+import type { ReturnOptions } from "./ReturnOptions.js";
 import type { RefreshFunctionUnsafeAsync, ReturnTypeUnsafeAsync } from "./types/index.js";
 import type { ExpiryCacheAsyncInterface, ExpiryCacheUnsafeInterface } from "./interface/index.js";
-import type { ReturnOptions } from "./ReturnOptions.js";
+import type { CacheEventsUnsafe } from "./types/events.js";
 
 export class ExpiryCacheAsync<T, F extends RefreshFunctionUnsafeAsync<T>>
-    extends ExpiryCacheAsyncBase<T, F, ReturnTypeUnsafeAsync<T | ReturnOptions<T>>>
+    extends ExpiryCacheAsyncBase<T, F, ReturnTypeUnsafeAsync<T | ReturnOptions<T>>, CacheEventsUnsafe<T>>
     implements ExpiryCacheAsyncInterface<T, F>, ExpiryCacheUnsafeInterface<T, F>
 {
     /**
@@ -17,7 +18,7 @@ export class ExpiryCacheAsync<T, F extends RefreshFunctionUnsafeAsync<T>>
         } else {
             this._refreshCb = this.refreshFn(...args);
             this.setData(await this._refreshCb);
-            this.emitter.emit("refreshed", this.data);
+            this._emit("refreshed", this.data);
             this._refreshCb = null;
         }
         return this.data;

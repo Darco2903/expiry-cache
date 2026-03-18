@@ -21,17 +21,18 @@
         "test": "vitest",
         "clean": "rimraf -g dist darco2903-expiry-cache-*.tgz"
     },
+    "dependencies": {
+        "@darco2903/typed-emitter": "^1.3.1"
+    },
     "peerDependencies": {
         "@darco2903/secondthought": "^1.3.0",
         "neverthrow": "^8.2.0"
     },
     "devDependencies": {
         "@darco2903/web-common": "^0.7.0",
-        "rimraf": "^6.1.0",
+        "@types/node": "^25.5.0",
+        "rimraf": "^6.1.3",
         "typescript": "^5.9.3",
         "vitest": "^3.2.4"
-    },
-    "dependencies": {
-        "@darco2903/typed-emitter": "^1.3.1"
     }
 }

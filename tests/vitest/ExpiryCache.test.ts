@@ -159,13 +159,13 @@ describe("ExpiryCache with return options", () => {
                 const expiresAt = Millisecond.now().add(new Millisecond(100));
                 return ReturnOptionsExpiresAt(0, expiresAt);
             },
-            1000,
+            100,
         );
         expect(cache.getData()).toBe(10);
         expect(cache.isExpired).toBeFalsy();
-        expect(cache.timeToLive).toBeLessThanOrEqual(1000);
+        expect(cache.timeToLive).toBeLessThanOrEqual(100);
 
-        await wait(1000);
+        await wait(200);
         expect(cache.isExpired).toBeTruthy();
         expect(cache.getData()).toBeNull();
 
@@ -184,7 +184,7 @@ describe("ExpiryCache expire event", () => {
         const expiredCallback = vi.fn(() => {
             elapsed = Millisecond.now().sub(start).time;
         });
-        cache.emitter.on("expired", expiredCallback);
+        cache.on("expired", expiredCallback);
         expect(expiredCallback).toHaveBeenCalledTimes(0);
 
         await wait(100);
@@ -202,7 +202,7 @@ describe("ExpiryCache expire event", () => {
         const expiredCallback = vi.fn(() => {
             elapsed = Millisecond.now().sub(start).time;
         });
-        cache.emitter.on("expired", expiredCallback);
+        cache.on("expired", expiredCallback);
         expect(expiredCallback).toHaveBeenCalledTimes(0);
 
         await wait(100);
@@ -215,11 +215,17 @@ describe("ExpiryCache expire event", () => {
 describe("ExpiryCache refreshed event", () => {
     it("should emit refreshed event when cache is refreshed", () => {
         const cache = new ExpiryCache(10, () => 0, 1000);
-        const refreshedCallback = vi.fn();
-        cache.emitter.on("refreshed", refreshedCallback);
+        let refreshedData: number | null = null;
+        const refreshedCallback = vi.fn((data) => {
+            refreshedData = data;
+        });
+
+        cache.on("refreshed", refreshedCallback);
         expect(refreshedCallback).toHaveBeenCalledTimes(0);
+        expect(refreshedData).toBeNull();
 
         cache.refresh();
         expect(refreshedCallback).toHaveBeenCalledTimes(1);
+        expect(refreshedData).toBe(0);
     });
 });

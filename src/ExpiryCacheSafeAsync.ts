@@ -1,11 +1,12 @@
 import { okAsync, type ResultAsync } from "neverthrow";
 import { ExpiryCacheAsyncBase } from "./base/index.js";
+import type { ReturnOptions } from "./ReturnOptions.js";
 import type { RefreshFunctionSafeAsync, ReturnTypeSafeAsync } from "./types/index.js";
 import type { ExpiryCacheAsyncInterface, ExpiryCacheSafeInterface } from "./interface/index.js";
-import type { ReturnOptions } from "./ReturnOptions.js";
+import type { CacheEventsSafe } from "./types/events.js";
 
 export class ExpiryCacheSafeAsync<T, F extends RefreshFunctionSafeAsync<T, E>, E>
-    extends ExpiryCacheAsyncBase<T, F, ReturnTypeSafeAsync<T | ReturnOptions<T>, E>, E>
+    extends ExpiryCacheAsyncBase<T, F, ReturnTypeSafeAsync<T | ReturnOptions<T>, E>, CacheEventsSafe<T, E>, E>
     implements ExpiryCacheAsyncInterface<T, F, E>, ExpiryCacheSafeInterface<T, F, E>
 {
     /**
@@ -23,11 +24,11 @@ export class ExpiryCacheSafeAsync<T, F extends RefreshFunctionSafeAsync<T, E>, E
                 .map(ExpiryCacheSafeAsync.mapRefreshReturn<T>)
                 .andTee((data) => {
                     this._refreshCb = null;
-                    this.emitter.emit("refreshed", data);
+                    this._emit("refreshed", data);
                 })
                 .orTee((err) => {
                     this._refreshCb = null;
-                    this.emitter.emit("error", err);
+                    this._emit("error", err);
                 });
         }
     }

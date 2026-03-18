@@ -2,9 +2,10 @@ import { ok, type Result } from "neverthrow";
 import { ExpiryCacheSyncBase } from "./base/index.js";
 import type { RefreshFunctionSafeSync } from "./types/index.js";
 import type { ExpiryCacheSafeInterface, ExpiryCacheSyncInterface } from "./interface/index.js";
+import type { CacheEventsSafe } from "./types/events.js";
 
 export class ExpiryCacheSafe<T, F extends RefreshFunctionSafeSync<T, E>, E>
-    extends ExpiryCacheSyncBase<T, F, E>
+    extends ExpiryCacheSyncBase<T, F, CacheEventsSafe<T, E>, E>
     implements ExpiryCacheSyncInterface<T, F, E>, ExpiryCacheSafeInterface<T, F, E>
 {
     /**
@@ -16,10 +17,10 @@ export class ExpiryCacheSafe<T, F extends RefreshFunctionSafeSync<T, E>, E>
             .andTee((data) => this.setData(data))
             .map(ExpiryCacheSyncBase.mapRefreshReturn<T>)
             .andTee((data) => {
-                this.emitter.emit("refreshed", this.data);
+                this._emit("refreshed", data);
             })
             .orTee((err) => {
-                this.emitter.emit("error", err);
+                this._emit("error", err);
             });
     }
 

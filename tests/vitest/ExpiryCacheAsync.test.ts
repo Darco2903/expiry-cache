@@ -164,13 +164,13 @@ describe("ExpiryCacheAsync with return options", () => {
                 const expiresAt = Millisecond.now().add(new Millisecond(100));
                 return ReturnOptionsExpiresAt(0, expiresAt);
             },
-            1000,
+            100,
         );
         expect(cache.getData()).toBe(10);
         expect(cache.isExpired).toBeFalsy();
-        expect(cache.timeToLive).toBeLessThanOrEqual(1000);
+        expect(cache.timeToLive).toBeLessThanOrEqual(100);
 
-        await wait(1000);
+        await wait(200);
         expect(cache.isExpired).toBeTruthy();
         expect(cache.getData()).toBeNull();
 
@@ -178,5 +178,58 @@ describe("ExpiryCacheAsync with return options", () => {
         expect(cache.getData()).toBe(0);
         expect(cache.isExpired).toBeFalsy();
         expect(cache.timeToLive).toBeLessThanOrEqual(100);
+    });
+});
+
+describe("ExpiryCacheAsync expire event", () => {
+    it("should emit expire event when cache expires", async () => {
+        const cache = new ExpiryCacheAsync(10, async () => 0, 50);
+        const start = Millisecond.now();
+        let elapsed = 0;
+        const expiredCallback = vi.fn(() => {
+            elapsed = Millisecond.now().sub(start).time;
+        });
+        cache.on("expired", expiredCallback);
+        expect(expiredCallback).toHaveBeenCalledTimes(0);
+
+        await wait(100);
+        expect(expiredCallback).toHaveBeenCalledTimes(1);
+        expect(elapsed).toBeGreaterThanOrEqual(50);
+    });
+
+    it("should emit expire event when cache expires after being refreshed", async () => {
+        const cache = new ExpiryCacheAsync(10, async () => 0, 50);
+
+        await cache.refresh();
+
+        const start = Millisecond.now();
+        let elapsed = 0;
+        const expiredCallback = vi.fn(() => {
+            elapsed = Millisecond.now().sub(start).time;
+        });
+        cache.on("expired", expiredCallback);
+        expect(expiredCallback).toHaveBeenCalledTimes(0);
+
+        await wait(100);
+
+        expect(expiredCallback).toHaveBeenCalledTimes(1);
+        expect(elapsed).toBeGreaterThanOrEqual(50);
+    });
+});
+
+describe("ExpiryCacheAsync refreshed event", () => {
+    it("should emit refreshed event when cache is refreshed", async () => {
+        const cache = new ExpiryCacheAsync(10, async () => 0, 1000);
+        let refreshedData: number | null = null;
+        const refreshedCallback = vi.fn((data: number) => {
+            refreshedData = data;
+        });
+        cache.on("refreshed", refreshedCallback);
+        expect(refreshedCallback).toHaveBeenCalledTimes(0);
+        expect(refreshedData).toBeNull();
+
+        await cache.refresh();
+        expect(refreshedCallback).toHaveBeenCalledTimes(1);
+        expect(refreshedData).toBe(0);
     });
 });
