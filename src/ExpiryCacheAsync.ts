@@ -1,39 +1,34 @@
-import type { Time } from "@darco2903/secondthought";
-import { ExpiryCacheAsyncBase } from "./base/ExpiryCacheAsyncBase.js";
+import { ExpiryCacheAsyncBase } from "./base/index.js";
 import type { RefreshFunctionUnsafeAsync, ReturnTypeUnsafeAsync } from "./types/index.js";
 import type { ExpiryCacheAsyncInterface, ExpiryCacheUnsafeInterface } from "./interface/index.js";
+import type { ReturnOptions } from "./ReturnOptions.js";
 
-export class ExpiryCacheAsync<T, U extends RefreshFunctionUnsafeAsync<T>>
-    extends ExpiryCacheAsyncBase<T, U, ReturnTypeUnsafeAsync<T>>
-    implements ExpiryCacheAsyncInterface<T, U>, ExpiryCacheUnsafeInterface<T, U>
+export class ExpiryCacheAsync<T, F extends RefreshFunctionUnsafeAsync<T>>
+    extends ExpiryCacheAsyncBase<T, F, ReturnTypeUnsafeAsync<T | ReturnOptions<T>>>
+    implements ExpiryCacheAsyncInterface<T, F>, ExpiryCacheUnsafeInterface<T, F>
 {
-    public async refresh(...args: Parameters<U>): Promise<T> {
+    /**
+     * Refreshes the cache by calling the refresh function with the provided arguments and updates the cache data. Returns the updated cache data.
+     * If a refresh is already in progress, it returns the existing refresh promise instead of calling the callback again.
+     */
+    public async refresh(...args: Parameters<F>): Promise<T> {
         if (this.refreshing) {
             await this._refreshCb;
         } else {
-            this._refreshCb = this.callback(...args);
+            this._refreshCb = this.refreshFn(...args);
             this.setData(await this._refreshCb);
             this._refreshCb = null;
         }
         return this.data;
     }
 
-    public async getDataOrRefresh(...args: Parameters<U>): Promise<T> {
+    /**
+     * Returns the cached data if it is not expired. If the cache is expired, it refreshes the cache by calling the refresh function with the provided arguments and returns the updated cache data.
+     */
+    public async getDataOrRefresh(...args: Parameters<F>): Promise<T> {
         if (this.isExpired) {
             await this.refresh(...args);
         }
-        return this.data;
-    }
-
-    public async refreshExpiresAt(expiresAt: number | Time, ...args: Parameters<U>): Promise<T> {
-        const expAt = this.argToMs(expiresAt);
-        this.setDataExpiresAt(await this.callback(...args), expAt);
-        return this.data;
-    }
-
-    public async refreshExpiresIn(expirationTime: number | Time, ...args: Parameters<U>): Promise<T> {
-        const expTime = this.argToMs(expirationTime);
-        this.setDataExpiresIn(await this.callback(...args), expTime);
         return this.data;
     }
 }

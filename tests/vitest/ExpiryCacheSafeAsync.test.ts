@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from "vitest";
 import { errAsync, ok, okAsync } from "neverthrow";
 import { wait } from "@darco2903/web-common";
-import { Millisecond, Second } from "@darco2903/secondthought";
-import { ExpiryCacheSafeAsync } from "../../src/index.js";
+import { Millisecond } from "@darco2903/secondthought";
+import { ExpiryCacheSafeAsync, ReturnOptionsExpiresAt, ReturnOptionsExpiresIn } from "../../src/index.js";
 
 describe("ExpiryCacheSafeAsync", () => {
     it("should create an instance with correct properties", () => {
@@ -106,23 +106,6 @@ describe("ExpiryCacheSafeAsync", () => {
         expect(cache.getData()).toBe(123);
     });
 
-    it("refreshExpiresAt and refreshExpiresIn update expiration correctly", async () => {
-        const cb = vi.fn(() => okAsync(7));
-        const cache = new ExpiryCacheSafeAsync(0, cb, 1000);
-
-        const future = Millisecond.now().add(new Second(5));
-        await cache.refreshExpiresAt(future);
-        expect(cache.getData()).toBe(7);
-        expect(cache.expiresAt).toBe(future.time);
-        expect(cache.expiresAtAsTime!.equals(future)).toBeTruthy();
-
-        // refreshExpiresIn
-        expect(await cache.refreshExpiresIn(2000)).toStrictEqual(ok(7));
-        expect(cache.getData()).toBe(7);
-        expect(cache.timeToLive).toBeGreaterThan(0);
-        expect(cache.timeToLive).toBeLessThanOrEqual(2000);
-    });
-
     it("neverExpire behave correctly", () => {
         const cb = vi.fn(() => okAsync(0));
         const cache = new ExpiryCacheSafeAsync(10, cb, 1000);
@@ -170,5 +153,46 @@ describe("ExpiryCacheSafeAsync Result Err", () => {
         await cache.refresh();
         expect(cache.getData()).toBeNull();
         expect(cache.isExpired).toBeTruthy();
+    });
+});
+
+describe("ExpiryCacheSafeAsync with return options", () => {
+    it("should handle expires in return options correctly", async () => {
+        const cache = new ExpiryCacheSafeAsync(10, () => okAsync(ReturnOptionsExpiresIn(0, 100)), 1000);
+        expect(cache.getData()).toBe(10);
+        expect(cache.isExpired).toBeFalsy();
+        expect(cache.timeToLive).toBeLessThanOrEqual(1000);
+
+        await wait(1000);
+        expect(cache.isExpired).toBeTruthy();
+        expect(cache.getData()).toBeNull();
+
+        await cache.refresh();
+        expect(cache.getData()).toBe(0);
+        expect(cache.isExpired).toBeFalsy();
+        expect(cache.timeToLive).toBeLessThanOrEqual(100);
+    });
+
+    it("should handle expires at return options correctly", async () => {
+        const cache = new ExpiryCacheSafeAsync(
+            10,
+            () => {
+                const expiresAt = Millisecond.now().add(new Millisecond(100));
+                return okAsync(ReturnOptionsExpiresAt(0, expiresAt));
+            },
+            1000,
+        );
+        expect(cache.getData()).toBe(10);
+        expect(cache.isExpired).toBeFalsy();
+        expect(cache.timeToLive).toBeLessThanOrEqual(1000);
+
+        await wait(1000);
+        expect(cache.isExpired).toBeTruthy();
+        expect(cache.getData()).toBeNull();
+
+        await cache.refresh();
+        expect(cache.getData()).toBe(0);
+        expect(cache.isExpired).toBeFalsy();
+        expect(cache.timeToLive).toBeLessThanOrEqual(100);
     });
 });

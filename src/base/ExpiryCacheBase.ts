@@ -1,12 +1,13 @@
 import { Time, Millisecond, Minute } from "@darco2903/secondthought";
 import type { RefreshFunction, ReturnType } from "../types/index.js";
+import { ReturnOptions, ReturnOptionsBase, ReturnOptionsExpiresAtClass, ReturnOptionsExpiresInClass } from "../ReturnOptions.js";
 
-export abstract class ExpiryCacheBase<T, U extends RefreshFunction<T, V>, V = any> {
+export abstract class ExpiryCacheBase<T, F extends RefreshFunction<T, E>, E = any> {
     /** The cached data. */
     protected data: T;
 
     /** The function to refresh the cached data. */
-    protected callback: U;
+    protected refreshFn: F;
 
     /** The time in milliseconds after which the cache expires. 0 means never expires. */
     protected _expirationTime: Millisecond;
@@ -89,12 +90,12 @@ export abstract class ExpiryCacheBase<T, U extends RefreshFunction<T, V>, V = an
      * @param callback The function to refresh the cached data.
      * @param expirationTime The time in milliseconds after which the cache expires. Defaults to 60_000 (1 minute). If set to 0, the cache will never expire.
      */
-    constructor(data: T, callback: U, expirationTime: number | Time = new Minute(1)) {
+    constructor(data: T, callback: F, expirationTime: number | Time = new Minute(1)) {
         const expTime = this.argToMs(expirationTime);
         this.data = data;
         this._expiresAt = expTime.time === 0 ? expTime : Millisecond.now().add(expTime);
         this._expirationTime = expTime;
-        this.callback = callback;
+        this.refreshFn = callback;
     }
 
     /**
@@ -137,11 +138,30 @@ export abstract class ExpiryCacheBase<T, U extends RefreshFunction<T, V>, V = an
     }
 
     /**
+     * Maps the return value of the refresh function to the actual data type. If the result is an instance of ReturnOptions, it extracts the data from it. Otherwise, it returns the result directly.
+     * @param result
+     */
+    protected static mapRefreshReturn<T>(result: T | ReturnOptions<T>): T {
+        if (result instanceof ReturnOptionsBase) {
+            return result.data;
+        }
+        return result;
+    }
+
+    /**
      * Sets the cached data and resets the expiration timestamp based on the expiration time.
      * @param data The new data to be cached.
      */
-    protected setData(data: T): void {
-        this.setDataExpiresIn(data, this._expirationTime);
+    protected setData(data: T | ReturnOptions<T>): void {
+        if (data instanceof ReturnOptionsBase) {
+            if (data instanceof ReturnOptionsExpiresInClass) {
+                this.setDataExpiresIn(data.data, data.expiresIn);
+            } else if (data instanceof ReturnOptionsExpiresAtClass) {
+                this.setDataExpiresAt(data.data, data.expiresAt);
+            }
+        } else {
+            this.setDataExpiresIn(data, this._expirationTime);
+        }
     }
 
     /**
@@ -181,20 +201,10 @@ export abstract class ExpiryCacheBase<T, U extends RefreshFunction<T, V>, V = an
     /**
      * @param args The arguments to pass to the refresh function.
      */
-    public abstract refresh(...args: Parameters<U>): ReturnType<T, V>;
+    public abstract refresh(...args: Parameters<F>): ReturnType<T, E>;
 
     /**
      * @param args The arguments to pass to the refresh function in case the cache is expired.
      */
-    public abstract getDataOrRefresh(...args: Parameters<U>): ReturnType<T, V>;
-
-    /**
-     * @param expiresAt The new expiration timestamp in milliseconds or as a Time object.
-     */
-    public abstract refreshExpiresAt(expiresAt: number | Time, ...args: Parameters<U>): ReturnType<T, V>;
-
-    /**
-     * @param expirationTime The new expiration time in milliseconds or as a Time object.
-     */
-    public abstract refreshExpiresIn(expirationTime: number | Time, ...args: Parameters<U>): ReturnType<T, V>;
+    public abstract getDataOrRefresh(...args: Parameters<F>): ReturnType<T, E>;
 }

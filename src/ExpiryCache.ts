@@ -3,38 +3,32 @@ import { ExpiryCacheSyncBase } from "./base/index.js";
 import type { RefreshFunctionUnsafeSync } from "./types/index.js";
 import type { ExpiryCacheSyncInterface, ExpiryCacheUnsafeInterface } from "./interface/index.js";
 
-export class ExpiryCache<T, U extends RefreshFunctionUnsafeSync<T>>
-    extends ExpiryCacheSyncBase<T, U>
-    implements ExpiryCacheSyncInterface<T, U>, ExpiryCacheUnsafeInterface<T, U>
+export class ExpiryCache<T, F extends RefreshFunctionUnsafeSync<T>>
+    extends ExpiryCacheSyncBase<T, F>
+    implements ExpiryCacheSyncInterface<T, F>, ExpiryCacheUnsafeInterface<T, F>
 {
     /**
      * Creates an instance of ExpiryCache.
      */
-    constructor(data: T, callback: U, expirationTime?: number | Time) {
+    constructor(data: T, callback: F, expirationTime?: number | Time) {
         super(data, callback, expirationTime);
     }
 
-    public refresh(...args: Parameters<U>): T {
-        this.setData(this.callback(...args));
+    /**
+     * Refreshes the cache by calling the refresh function with the provided arguments and updates the cache data. Returns the updated cache data.
+     */
+    public refresh(...args: Parameters<F>): T {
+        this.setData(this.refreshFn(...args));
         return this.data;
     }
 
-    public getDataOrRefresh(...args: Parameters<U>): T {
+    /**
+     * Returns the cached data if it is not expired. If the cache is expired, it refreshes the cache by calling the refresh function with the provided arguments and returns the updated cache data.
+     */
+    public getDataOrRefresh(...args: Parameters<F>): T {
         if (this.isExpired) {
             this.refresh(...args);
         }
-        return this.data;
-    }
-
-    public refreshExpiresAt(expiresAt: number | Time, ...args: Parameters<U>): T {
-        const expAt = this.argToMs(expiresAt);
-        this.setDataExpiresAt(this.callback(...args), expAt);
-        return this.data;
-    }
-
-    public refreshExpiresIn(expirationTime: number | Time, ...args: Parameters<U>): T {
-        const expTime = this.argToMs(expirationTime);
-        this.setDataExpiresIn(this.callback(...args), expTime);
         return this.data;
     }
 }

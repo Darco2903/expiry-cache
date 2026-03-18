@@ -1,13 +1,14 @@
 import { Time } from "@darco2903/secondthought";
 import { ExpiryCacheBase } from "./ExpiryCacheBase.js";
 import type { RefreshFunctionAsync, ReturnTypeAsync } from "../types/index.js";
+import type { ReturnOptions } from "../ReturnOptions.js";
 
 export abstract class ExpiryCacheAsyncBase<
     T,
-    U extends RefreshFunctionAsync<T, W>,
-    V extends ReturnTypeAsync<T, W>,
-    W = any,
-> extends ExpiryCacheBase<T, U, W> {
+    F extends RefreshFunctionAsync<T, E>,
+    V extends ReturnTypeAsync<T | ReturnOptions<T>, E>,
+    E = any,
+> extends ExpiryCacheBase<T, F, E> {
     /** The promise of the current refresh operation, or null if no refresh is in progress. */
     protected _refreshCb: V | null;
 
@@ -16,7 +17,7 @@ export abstract class ExpiryCacheAsyncBase<
         return this._refreshCb !== null;
     }
 
-    constructor(data: T, callback: U, expirationTime?: number | Time) {
+    constructor(data: T, callback: F, expirationTime?: number | Time) {
         super(data, callback, expirationTime);
         this._refreshCb = null;
     }

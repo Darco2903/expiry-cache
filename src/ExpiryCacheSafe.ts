@@ -1,42 +1,31 @@
-import type { Time } from "@darco2903/secondthought";
 import { ok, type Result } from "neverthrow";
 import { ExpiryCacheSyncBase } from "./base/index.js";
 import type { RefreshFunctionSafeSync } from "./types/index.js";
 import type { ExpiryCacheSafeInterface, ExpiryCacheSyncInterface } from "./interface/index.js";
 
-export class ExpiryCacheSafe<T, U extends RefreshFunctionSafeSync<T, V>, V>
-    extends ExpiryCacheSyncBase<T, U, V>
-    implements ExpiryCacheSyncInterface<T, U, V>, ExpiryCacheSafeInterface<T, U, V>
+export class ExpiryCacheSafe<T, F extends RefreshFunctionSafeSync<T, E>, E>
+    extends ExpiryCacheSyncBase<T, F, E>
+    implements ExpiryCacheSyncInterface<T, F, E>, ExpiryCacheSafeInterface<T, F, E>
 {
     /**
-     * Creates an instance of ExpiryCacheSafe.
+     * Refreshes the cache by calling the refresh function with the provided arguments and updates the cache data if the result is Ok, otherwise it does not update the cache data.
+     * Returns the refresh function result.
      */
-    constructor(data: T, callback: U, expirationTime?: number | Time) {
-        super(data, callback, expirationTime);
+    public refresh(...args: Parameters<F>): Result<T, E> {
+        return this.refreshFn(...args)
+            .andTee(this.setData.bind(this))
+            .map(ExpiryCacheSyncBase.mapRefreshReturn<T>);
     }
 
-    public refresh(...args: Parameters<U>): Result<T, V> {
-        return this.callback(...args).andTee(this.setData.bind(this));
-    }
-
-    public getDataOrRefresh(...args: Parameters<U>): Result<T, V> {
+    /**
+     * Returns the cached data if it is not expired.
+     * If the cache is expired, it refreshes the cache by calling the refresh function with the provided arguments and returns the refresh function result.
+     * It behaves the same as the refresh method if the cache is expired, otherwise it returns the cached data wrapped in an Ok result.
+     */
+    public getDataOrRefresh(...args: Parameters<F>): Result<T, E> {
         if (this.isExpired) {
             return this.refresh(...args);
         }
         return ok(this.data);
-    }
-
-    public refreshExpiresAt(expiresAt: number | Time, ...args: Parameters<U>): Result<T, V> {
-        const expAt = this.argToMs(expiresAt);
-        return this.callback(...args).andTee((res) => {
-            this.setDataExpiresAt(res, expAt);
-        });
-    }
-
-    public refreshExpiresIn(expirationTime: number | Time, ...args: Parameters<U>): Result<T, V> {
-        const expTime = this.argToMs(expirationTime);
-        return this.callback(...args).andTee((res) => {
-            this.setDataExpiresIn(res, expTime);
-        });
     }
 }
