@@ -3,6 +3,7 @@ import { ExpiryCacheSyncBase } from "./base/index.js";
 import type { RefreshFunctionSafeSync } from "./types/index.js";
 import type { ExpiryCacheSafeInterface, ExpiryCacheSyncInterface } from "./interface/index.js";
 import type { CacheEventsSafe } from "./types/events.js";
+import { mapRefreshReturn } from "./utils.js";
 
 export class ExpiryCacheSafe<T, E, F extends RefreshFunctionSafeSync<T, E>>
     extends ExpiryCacheSyncBase<T, F, CacheEventsSafe<T, E>, E>
@@ -15,7 +16,7 @@ export class ExpiryCacheSafe<T, E, F extends RefreshFunctionSafeSync<T, E>>
     public refresh(...args: Parameters<F>): Result<T, E> {
         return this.refreshFn(...args)
             .andTee((data) => this.setData(data))
-            .map(ExpiryCacheSyncBase.mapRefreshReturn<T>)
+            .map(mapRefreshReturn<T>)
             .andTee((data) => {
                 this._emit("refreshed", data);
             })

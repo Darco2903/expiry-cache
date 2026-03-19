@@ -166,17 +166,6 @@ export abstract class ExpiryCacheBase<
     }
 
     /**
-     * Maps the return value of the refresh function to the actual data type. If the result is an instance of ReturnOptions, it extracts the data from it. Otherwise, it returns the result directly.
-     * @param result
-     */
-    protected static mapRefreshReturn<T>(result: T | ReturnOptions<T>): T {
-        if (result instanceof ReturnOptionsBase) {
-            return result.data;
-        }
-        return result;
-    }
-
-    /**
      * Sets the cached data and resets the expiration timestamp based on the expiration time.
      * @param data The new data to be cached.
      */
@@ -211,7 +200,7 @@ export abstract class ExpiryCacheBase<
     }
 
     /**
-     * Gets the raw cached data without checking expiration.
+     * Gets the cached data without checking expiration.
      */
     public getRawData(): T {
         return this.data;

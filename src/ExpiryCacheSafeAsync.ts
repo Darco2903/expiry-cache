@@ -4,6 +4,7 @@ import type { ReturnOptions } from "./ReturnOptions.js";
 import type { RefreshFunctionSafeAsync, ReturnTypeSafeAsync } from "./types/index.js";
 import type { ExpiryCacheAsyncInterface, ExpiryCacheSafeInterface } from "./interface/index.js";
 import type { CacheEventsSafe } from "./types/events.js";
+import { mapRefreshReturn } from "./utils.js";
 
 export class ExpiryCacheSafeAsync<T, E, F extends RefreshFunctionSafeAsync<T, E>>
     extends ExpiryCacheAsyncBase<T, F, ReturnTypeSafeAsync<T | ReturnOptions<T>, E>, CacheEventsSafe<T, E>, E>
@@ -16,12 +17,12 @@ export class ExpiryCacheSafeAsync<T, E, F extends RefreshFunctionSafeAsync<T, E>
      */
     public refresh(...args: Parameters<F>): ResultAsync<T, E> {
         if (this._refreshCb !== null) {
-            return this._refreshCb.map(ExpiryCacheSafeAsync.mapRefreshReturn<T>);
+            return this._refreshCb.map(mapRefreshReturn<T>);
         } else {
             this._refreshCb = this.refreshFn(...args);
             return this._refreshCb
                 .andTee((res) => this.setData(res))
-                .map(ExpiryCacheSafeAsync.mapRefreshReturn<T>)
+                .map(mapRefreshReturn<T>)
                 .andTee((data) => {
                     this._refreshCb = null;
                     this._emit("refreshed", data);
