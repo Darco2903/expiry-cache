@@ -1,6 +1,7 @@
 import { Millisecond, type Time } from "@darco2903/secondthought";
+import { argToMs } from "./utils.js";
 
-export class ReturnOptionsBase<T> {
+export abstract class ReturnOptionsBase<T> {
     public readonly data: T;
 
     constructor(data: T) {
@@ -13,7 +14,7 @@ export class ReturnOptionsExpiresInClass<T> extends ReturnOptionsBase<T> {
 
     constructor(data: T, expiresIn: number | Time) {
         super(data);
-        this.expiresIn = typeof expiresIn === "number" ? new Millisecond(expiresIn) : expiresIn.toMillisecond();
+        this.expiresIn = argToMs(expiresIn);
     }
 }
 
@@ -22,7 +23,7 @@ export class ReturnOptionsExpiresAtClass<T> extends ReturnOptionsBase<T> {
 
     constructor(data: T, expiresAt: number | Time) {
         super(data);
-        this.expiresAt = typeof expiresAt === "number" ? new Millisecond(expiresAt) : expiresAt.toMillisecond();
+        this.expiresAt = argToMs(expiresAt);
     }
 }
 

@@ -3,6 +3,7 @@ import { Time, Millisecond, Minute } from "@darco2903/secondthought";
 import type { RefreshFunction, CacheReturnType } from "../types/index.js";
 import { type ReturnOptions, ReturnOptionsBase, ReturnOptionsExpiresAtClass, ReturnOptionsExpiresInClass } from "../ReturnOptions.js";
 import type { CacheEvents } from "../types/events.js";
+import { argToMs } from "../utils.js";
 
 export abstract class ExpiryCacheBase<
     T,
@@ -87,13 +88,6 @@ export abstract class ExpiryCacheBase<
     }
 
     /**
-     * Converts a number or Time object to milliseconds.
-     */
-    protected argToMs(arg: number | Time): Millisecond {
-        return typeof arg === "number" ? new Millisecond(arg) : arg.toMillisecond();
-    }
-
-    /**
      * Creates an instance of ExpiryCache.
      * @param data  The initial data to be cached.
      * @param refreshFn The function to refresh the cached data.
@@ -101,7 +95,7 @@ export abstract class ExpiryCacheBase<
      */
     constructor(data: T, refreshFn: F, expirationTime: number | Time = new Minute(1)) {
         super();
-        const expTime = this.argToMs(expirationTime);
+        const expTime = argToMs(expirationTime);
         this.data = data;
         this._expiresAt = expTime.time === 0 ? expTime : Millisecond.now().add(expTime);
         this._expirationTime = expTime;
@@ -151,7 +145,7 @@ export abstract class ExpiryCacheBase<
      * @param ms The time in milliseconds after which the cache should expire. If set to 0, the cache will never expire.
      */
     public setExpiresIn(ms: number | Time): void {
-        const t = this.argToMs(ms);
+        const t = argToMs(ms);
         this._expiresAt = this.expIn(t);
         this.setExpirationTimeout();
     }
@@ -161,7 +155,7 @@ export abstract class ExpiryCacheBase<
      * @param timestamp The expiration timestamp in milliseconds or as a Time object. If set to 0, the cache will never expire.
      */
     public setExpiresAt(timestamp: number | Time): void {
-        this._expiresAt = this.argToMs(timestamp);
+        this._expiresAt = argToMs(timestamp);
         this.setExpirationTimeout();
     }
 
