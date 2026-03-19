@@ -116,6 +116,34 @@ describe("ExpiryCacheSafe", () => {
     });
 });
 
+describe("ExpiryCacheSafe update expiration time", () => {
+    it("setExpiresIn updates expiration time correctly", () => {
+        const cache = new ExpiryCacheSafe(10, () => ok(0), 100);
+        expect(cache.timeToLive).toBeLessThanOrEqual(100);
+        expect(cache.expirationTime).toBe(100);
+        expect(cache.expirationTimeAsTime).toStrictEqual(new Millisecond(100));
+
+        cache.setExpiresIn(200);
+        expect(cache.timeToLive).toBeLessThanOrEqual(200);
+        expect(cache.expirationTime).toBe(200);
+        expect(cache.expirationTimeAsTime).toStrictEqual(new Millisecond(200));
+    });
+
+    it("setExpiresAt updates expiration time correctly", () => {
+        const now = Millisecond.now().add(new Millisecond(100));
+        const cache = new ExpiryCacheSafe(10, () => ok(0), 100);
+        expect(cache.timeToLive).toBeLessThanOrEqual(100);
+        expect(cache.expiresAt).toBeGreaterThanOrEqual(now.time);
+        expect(cache.expiresAtAsTime.greaterThanOrEqual(now)).toBeTruthy();
+
+        const newExpiresAt = Millisecond.now().add(new Millisecond(200));
+        cache.setExpiresAt(newExpiresAt);
+        expect(cache.timeToLive).toBeLessThanOrEqual(200);
+        expect(cache.expiresAt).toBe(newExpiresAt.time);
+        expect(cache.expiresAtAsTime.greaterThanOrEqual(newExpiresAt)).toBeTruthy();
+    });
+});
+
 describe("ExpiryCacheSafe Nullable", () => {
     it("supports nullable data and refresh functions", () => {
         const cb = vi.fn((res: number | null) => ok(res));

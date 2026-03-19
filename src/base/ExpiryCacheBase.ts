@@ -129,6 +129,7 @@ export abstract class ExpiryCacheBase<
                 this._expirationTimeout = null;
                 this._emit("expired");
             }, this.timeToLive);
+            this._expirationTimeout.unref();
         }
     }
 
@@ -146,16 +147,21 @@ export abstract class ExpiryCacheBase<
      */
     public setExpiresIn(ms: number | Time): void {
         const t = argToMs(ms);
-        this._expiresAt = this.expIn(t);
-        this.setExpirationTimeout();
+        this._expirationTime = t;
+        this._setExpiresAt(this.expIn(t));
     }
 
     /**
      * Sets the expiration timestamp to a specific time.
-     * @param timestamp The expiration timestamp in milliseconds or as a Time object. If set to 0, the cache will never expire.
+     * @param expiresAt The expiration timestamp in milliseconds or as a Time object. If set to 0, the cache will never expire.
      */
-    public setExpiresAt(timestamp: number | Time): void {
-        this._expiresAt = argToMs(timestamp);
+    public setExpiresAt(expiresAt: number | Time): void {
+        const t = argToMs(expiresAt);
+        this._setExpiresAt(t);
+    }
+
+    protected _setExpiresAt(expiresAt: Millisecond): void {
+        this._expiresAt = expiresAt;
         this.setExpirationTimeout();
     }
 
@@ -192,8 +198,7 @@ export abstract class ExpiryCacheBase<
      */
     protected setDataExpiresAt(data: T, expiresAt: Millisecond): void {
         this.data = data;
-        this._expiresAt = expiresAt;
-        this.setExpirationTimeout();
+        this._setExpiresAt(expiresAt);
     }
 
     /**
@@ -201,7 +206,8 @@ export abstract class ExpiryCacheBase<
      * @param expirationTime The new expiration time in milliseconds. If set to 0, the cache will never expire.
      */
     protected setDataExpiresIn(data: T, expirationTime: Millisecond): void {
-        this.setDataExpiresAt(data, this.expIn(expirationTime));
+        this.data = data;
+        this.setExpiresIn(expirationTime);
     }
 
     /**

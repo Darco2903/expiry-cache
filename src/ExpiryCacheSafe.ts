@@ -4,7 +4,7 @@ import type { RefreshFunctionSafeSync } from "./types/index.js";
 import type { ExpiryCacheSafeInterface, ExpiryCacheSyncInterface } from "./interface/index.js";
 import type { CacheEventsSafe } from "./types/events.js";
 
-export class ExpiryCacheSafe<T, F extends RefreshFunctionSafeSync<T, E>, E>
+export class ExpiryCacheSafe<T, E, F extends RefreshFunctionSafeSync<T, E>>
     extends ExpiryCacheSyncBase<T, F, CacheEventsSafe<T, E>, E>
     implements ExpiryCacheSyncInterface<T, F, E>, ExpiryCacheSafeInterface<T, F, E>
 {
