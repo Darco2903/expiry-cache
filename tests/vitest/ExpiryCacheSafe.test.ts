@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import { err, ok } from "neverthrow";
 import { wait } from "@darco2903/web-common";
 import { Millisecond } from "@darco2903/secondthought";
-import { ExpiryCacheSafe, ReturnOptionsExpiresAt, ReturnOptionsExpiresIn } from "../../src/index.js";
+import { ExpiryCacheSafe, ReturnOptions } from "../../src/index.js";
 
 describe("ExpiryCacheSafe", () => {
     it("should create an instance with correct properties", () => {
@@ -73,7 +73,7 @@ describe("ExpiryCacheSafe", () => {
 
     it("refresh updates data and expiration", () => {
         const cb = vi.fn(() => ok(99));
-        const cache = new ExpiryCacheSafe<number, typeof cb, never>(0, cb, 50);
+        const cache = new ExpiryCacheSafe(0, cb, 50);
         expect(cache.getData()).toBe(0);
 
         cache.expire();
@@ -147,7 +147,7 @@ describe("ExpiryCacheSafe update expiration time", () => {
 describe("ExpiryCacheSafe Nullable", () => {
     it("supports nullable data and refresh functions", () => {
         const cb = vi.fn((res: number | null) => ok(res));
-        const cache = new ExpiryCacheSafe<number | null, typeof cb, never>(10, cb, 10_000);
+        const cache = new ExpiryCacheSafe<number | null, never, typeof cb>(10, cb, 10_000);
         expect(cache.getData()).toBe(10);
 
         cache.expire();
@@ -180,7 +180,7 @@ describe("ExpiryCacheSafe Result Err", () => {
 
 describe("ExpiryCacheSafe with return options", () => {
     it("should handle expires in return options correctly", async () => {
-        const cache = new ExpiryCacheSafe(10, () => ok(ReturnOptionsExpiresIn(0, 100)), 1000);
+        const cache = new ExpiryCacheSafe(10, () => ok(ReturnOptions.ExpiresIn(0, 100)), 1000);
         expect(cache.getData()).toBe(10);
         expect(cache.isExpired).toBeFalsy();
         expect(cache.timeToLive).toBeLessThanOrEqual(1000);
@@ -200,7 +200,7 @@ describe("ExpiryCacheSafe with return options", () => {
             10,
             () => {
                 const expiresAt = Millisecond.now().add(new Millisecond(100));
-                return ok(ReturnOptionsExpiresAt(0, expiresAt));
+                return ok(ReturnOptions.ExpiresAt(0, expiresAt));
             },
             100,
         );

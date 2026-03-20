@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { wait } from "@darco2903/web-common";
 import { Millisecond } from "@darco2903/secondthought";
-import { ExpiryCache, ReturnOptionsExpiresAt, ReturnOptionsExpiresIn } from "../../src/index.js";
+import { ExpiryCache, ReturnOptions } from "../../src/index.js";
 
 describe("ExpiryCache", () => {
     it("should create an instance with correct properties", () => {
@@ -165,7 +165,7 @@ describe("ExpiryCache Nullable", () => {
 
 describe("ExpiryCache with return options", () => {
     it("should handle expires in return options correctly", async () => {
-        const cache = new ExpiryCache(10, () => ReturnOptionsExpiresIn(0, 100), 1000);
+        const cache = new ExpiryCache(10, () => ReturnOptions.ExpiresIn(0, 100), 1000);
         expect(cache.getData()).toBe(10);
         expect(cache.isExpired).toBeFalsy();
         expect(cache.timeToLive).toBeLessThanOrEqual(1000);
@@ -185,7 +185,7 @@ describe("ExpiryCache with return options", () => {
             10,
             () => {
                 const expiresAt = Millisecond.now().add(new Millisecond(100));
-                return ReturnOptionsExpiresAt(0, expiresAt);
+                return ReturnOptions.ExpiresAt(0, expiresAt);
             },
             100,
         );

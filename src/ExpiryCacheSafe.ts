@@ -1,13 +1,13 @@
 import { ok, type Result } from "neverthrow";
 import { ExpiryCacheSyncBase } from "./base/index.js";
 import type { RefreshFunctionSafeSync } from "./types/index.js";
-import type { ExpiryCacheSafeInterface, ExpiryCacheSyncInterface } from "./interface/index.js";
+import type { IExpiryCacheSafe, IExpiryCacheSync } from "./interface/index.js";
 import type { CacheEventsSafe } from "./types/events.js";
 import { mapRefreshReturn } from "./utils.js";
 
 export class ExpiryCacheSafe<T, E, F extends RefreshFunctionSafeSync<T, E>>
     extends ExpiryCacheSyncBase<T, F, CacheEventsSafe<T, E>, E>
-    implements ExpiryCacheSyncInterface<T, F, E>, ExpiryCacheSafeInterface<T, F, E>
+    implements IExpiryCacheSync<T, F, E>, IExpiryCacheSafe<T, F, E>
 {
     /**
      * Refreshes the cache by calling the refresh function with the provided arguments and updates the cache data if the result is Ok, otherwise it does not update the cache data.

@@ -1,7 +1,8 @@
 import { TypedEmitterProtected } from "@darco2903/typed-emitter";
 import { Time, Millisecond, Minute } from "@darco2903/secondthought";
-import type { RefreshFunction, CacheReturnType } from "../types/index.js";
-import { type ReturnOptions, ReturnOptionsBase, ReturnOptionsExpiresAtClass, ReturnOptionsExpiresInClass } from "../ReturnOptions.js";
+import type { RefreshFunction } from "../types/RefreshFunction.js";
+import type { CacheReturnType } from "../types/ReturnType.js";
+import { ReturnOptions, ReturnOptionsExpiresAtClass, ReturnOptionsExpiresInClass } from "../ReturnOptions.js";
 import type { CacheEvents } from "../types/events.js";
 import { argToMs } from "../utils.js";
 
@@ -170,7 +171,7 @@ export abstract class ExpiryCacheBase<
      * @param data The new data to be cached.
      */
     protected setData(data: T | ReturnOptions<T>): void {
-        if (data instanceof ReturnOptionsBase) {
+        if (data instanceof ReturnOptions) {
             if (data instanceof ReturnOptionsExpiresInClass) {
                 this.setDataExpiresIn(data.data, data.expiresIn);
             } else if (data instanceof ReturnOptionsExpiresAtClass) {

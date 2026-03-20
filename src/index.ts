@@ -3,8 +3,7 @@ export * from "./ExpiryCacheAsync.js";
 export * from "./ExpiryCacheSafe.js";
 export * from "./ExpiryCacheSafeAsync.js";
 
-export type * from "./interface/index.js";
 export type * from "./types/index.js";
 
-export { ReturnOptionsExpiresIn, ReturnOptionsExpiresAt } from "./ReturnOptions.js";
-export type { ReturnOptionsExpiresInClass, ReturnOptionsExpiresAtClass, ReturnOptions } from "./ReturnOptions.js";
+export { ReturnOptions } from "./ReturnOptions.js";
+    

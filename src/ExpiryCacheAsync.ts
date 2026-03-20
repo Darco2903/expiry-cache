@@ -1,12 +1,12 @@
 import { ExpiryCacheAsyncBase } from "./base/index.js";
 import type { ReturnOptions } from "./ReturnOptions.js";
 import type { RefreshFunctionUnsafeAsync, ReturnTypeUnsafeAsync } from "./types/index.js";
-import type { ExpiryCacheAsyncInterface, ExpiryCacheUnsafeInterface } from "./interface/index.js";
+import type { IExpiryCacheAsync, IExpiryCacheUnsafe } from "./interface/index.js";
 import type { CacheEventsUnsafe } from "./types/events.js";
 
 export class ExpiryCacheAsync<T, F extends RefreshFunctionUnsafeAsync<T>>
     extends ExpiryCacheAsyncBase<T, F, ReturnTypeUnsafeAsync<T | ReturnOptions<T>>, CacheEventsUnsafe<T>>
-    implements ExpiryCacheAsyncInterface<T, F>, ExpiryCacheUnsafeInterface<T, F>
+    implements IExpiryCacheAsync<T, F>, IExpiryCacheUnsafe<T, F>
 {
     /**
      * Refreshes the cache by calling the refresh function with the provided arguments and updates the cache data. Returns the updated cache data.

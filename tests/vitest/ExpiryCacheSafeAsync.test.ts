@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import { errAsync, ok, okAsync } from "neverthrow";
 import { wait } from "@darco2903/web-common";
 import { Millisecond } from "@darco2903/secondthought";
-import { ExpiryCacheSafeAsync, ReturnOptionsExpiresAt, ReturnOptionsExpiresIn } from "../../src/index.js";
+import { ExpiryCacheSafeAsync, ReturnOptions } from "../../src/index.js";
 
 describe("ExpiryCacheSafeAsync", () => {
     it("should create an instance with correct properties", () => {
@@ -153,7 +153,7 @@ describe("ExpiryCacheAsync update expiration time", () => {
 describe("ExpiryCacheSafeAsync Nullable", () => {
     it("supports nullable data and refresh functions", async () => {
         const cb = vi.fn((res: number | null) => okAsync(res));
-        const cache = new ExpiryCacheSafeAsync<number | null, typeof cb, never>(10, cb, 10_000);
+        const cache = new ExpiryCacheSafeAsync<number | null, never, typeof cb>(10, cb, 10_000);
         expect(cache.getData()).toBe(10);
 
         cache.expire();
@@ -186,7 +186,7 @@ describe("ExpiryCacheSafeAsync Result Err", () => {
 
 describe("ExpiryCacheSafeAsync with return options", () => {
     it("should handle expires in return options correctly", async () => {
-        const cache = new ExpiryCacheSafeAsync(10, () => okAsync(ReturnOptionsExpiresIn(0, 100)), 1000);
+        const cache = new ExpiryCacheSafeAsync(10, () => okAsync(ReturnOptions.ExpiresIn(0, 100)), 1000);
         expect(cache.getData()).toBe(10);
         expect(cache.isExpired).toBeFalsy();
         expect(cache.timeToLive).toBeLessThanOrEqual(1000);
@@ -206,7 +206,7 @@ describe("ExpiryCacheSafeAsync with return options", () => {
             10,
             () => {
                 const expiresAt = Millisecond.now().add(new Millisecond(100));
-                return okAsync(ReturnOptionsExpiresAt(0, expiresAt));
+                return okAsync(ReturnOptions.ExpiresAt(0, expiresAt));
             },
             100,
         );

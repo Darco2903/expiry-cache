@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { Millisecond } from "@darco2903/secondthought";
-import { ExpiryCache, ReturnOptionsExpiresAt, ReturnOptionsExpiresIn } from "../../src/index.js";
+import { ExpiryCache, ReturnOptions } from "../../src/index.js";
 
 describe("No ReturnOptions", () => {
     it("should create an instance with correct properties", () => {
@@ -19,7 +19,7 @@ describe("No ReturnOptions", () => {
 
 describe("ReturnOptions", () => {
     it("should handle ReturnOptionsExpiresIn correctly", () => {
-        const cache = new ExpiryCache(100, (expiresIn: number) => ReturnOptionsExpiresIn(0, expiresIn), 100);
+        const cache = new ExpiryCache(100, (expiresIn: number) => ReturnOptions.ExpiresIn(0, expiresIn), 100);
         expect(cache.expirationTime).toBe(100);
         expect(cache.expirationTimeAsTime).toStrictEqual(new Millisecond(100));
 
@@ -32,7 +32,7 @@ describe("ReturnOptions", () => {
     });
 
     it("should handle ReturnOptionsExpiresAt correctly", () => {
-        const cache = new ExpiryCache(100, (expiresAt: number) => ReturnOptionsExpiresAt(0, expiresAt), 100);
+        const cache = new ExpiryCache(100, (expiresAt: number) => ReturnOptions.ExpiresAt(0, expiresAt), 100);
         expect(cache.expirationTime).toBe(100);
         expect(cache.expirationTimeAsTime).toStrictEqual(new Millisecond(100));
 

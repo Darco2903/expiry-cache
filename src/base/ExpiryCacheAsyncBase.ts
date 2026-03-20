@@ -1,7 +1,8 @@
 import { Time } from "@darco2903/secondthought";
 import { ExpiryCacheBase } from "./ExpiryCacheBase.js";
 import type { ReturnOptions } from "../ReturnOptions.js";
-import type { RefreshFunctionAsync, ReturnTypeAsync } from "../types/index.js";
+import type { RefreshFunctionAsync } from "../types/RefreshFunction.js";
+import type { ReturnTypeAsync } from "../types/ReturnType.js";
 import type { CacheEvents } from "../types/events.js";
 
 export abstract class ExpiryCacheAsyncBase<

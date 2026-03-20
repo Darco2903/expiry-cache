@@ -2,13 +2,13 @@ import { okAsync, type ResultAsync } from "neverthrow";
 import { ExpiryCacheAsyncBase } from "./base/index.js";
 import type { ReturnOptions } from "./ReturnOptions.js";
 import type { RefreshFunctionSafeAsync, ReturnTypeSafeAsync } from "./types/index.js";
-import type { ExpiryCacheAsyncInterface, ExpiryCacheSafeInterface } from "./interface/index.js";
+import type { IExpiryCacheAsync, IExpiryCacheSafe } from "./interface/index.js";
 import type { CacheEventsSafe } from "./types/events.js";
 import { mapRefreshReturn } from "./utils.js";
 
 export class ExpiryCacheSafeAsync<T, E, F extends RefreshFunctionSafeAsync<T, E>>
     extends ExpiryCacheAsyncBase<T, F, ReturnTypeSafeAsync<T | ReturnOptions<T>, E>, CacheEventsSafe<T, E>, E>
-    implements ExpiryCacheAsyncInterface<T, F, E>, ExpiryCacheSafeInterface<T, F, E>
+    implements IExpiryCacheAsync<T, F, E>, IExpiryCacheSafe<T, F, E>
 {
     /**
      * Refreshes the cache by calling the refresh function with the provided arguments and updates the cache data if the result is Ok, otherwise it does not update the cache data.

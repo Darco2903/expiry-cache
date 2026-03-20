@@ -1,5 +1,5 @@
 import { ExpiryCacheBase } from "./ExpiryCacheBase.js";
-import type { RefreshFunctionSync } from "../types/index.js";
+import type { RefreshFunctionSync } from "../types/RefreshFunction.js";
 import type { CacheEvents } from "../types/events.js";
 
 export abstract class ExpiryCacheSyncBase<
