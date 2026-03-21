@@ -22,10 +22,10 @@
         "clean": "rimraf -g dist darco2903-expiry-cache-*.tgz"
     },
     "dependencies": {
+        "@darco2903/secondthought": "^1.3.0",
         "@darco2903/typed-emitter": "^1.3.1"
     },
     "peerDependencies": {
-        "@darco2903/secondthought": "^1.3.0",
         "neverthrow": "^8.2.0"
     },
     "devDependencies": {
