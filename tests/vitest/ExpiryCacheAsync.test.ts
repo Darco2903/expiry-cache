@@ -170,19 +170,19 @@ describe("ExpiryCacheAsync Nullable", () => {
 
 describe("ExpiryCacheAsync with return options", () => {
     it("should handle expires in return options correctly", async () => {
-        const cache = new ExpiryCacheAsync(10, async () => ReturnOptions.ExpiresIn(0, 100), 1000);
+        const cache = new ExpiryCacheAsync(10, async () => ReturnOptions.ExpiresIn(0, 50), 100);
         expect(cache.getData()).toBe(10);
         expect(cache.isExpired).toBeFalsy();
-        expect(cache.timeToLive).toBeLessThanOrEqual(1000);
+        expect(cache.timeToLive).toBeLessThanOrEqual(100);
 
-        await wait(1000);
+        await wait(150);
         expect(cache.isExpired).toBeTruthy();
         expect(cache.getData()).toBeNull();
 
         await cache.refresh();
         expect(cache.getData()).toBe(0);
         expect(cache.isExpired).toBeFalsy();
-        expect(cache.timeToLive).toBeLessThanOrEqual(100);
+        expect(cache.timeToLive).toBeLessThanOrEqual(50);
     });
 
     it("should handle expires at return options correctly", async () => {

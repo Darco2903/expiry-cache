@@ -244,13 +244,15 @@ describe("ExpiryCacheSafeAsync expire event", () => {
     it("should emit expire event when cache expires after being refreshed", async () => {
         const cache = new ExpiryCacheSafeAsync(10, () => okAsync(0), 50);
 
-        await cache.refresh();
-
+        
         const start = Millisecond.now();
         let elapsed = 0;
         const expiredCallback = vi.fn(() => {
             elapsed = Millisecond.now().sub(start).time;
         });
+
+        await cache.refresh();
+        
         cache.on("expired", expiredCallback);
         expect(expiredCallback).toHaveBeenCalledTimes(0);
 
